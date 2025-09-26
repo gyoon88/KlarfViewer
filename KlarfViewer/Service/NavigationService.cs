@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlarfViewer.ViewModel
+namespace KlarfViewer.Service
 {
-    public class MapViewerViewModel
+    internal class NavigationService
     {
     }
 }
