@@ -6,24 +6,65 @@
         xmlns:local="clr-namespace:KlarfViewer"
         mc:Ignorable="d"
         Title="KlarfViewer" Height="800" Width="1200" MinHeight="500" MinWidth="1000">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-            <TextBlock Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        </Border>
+    <DockPanel>
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="열기" Command="{Binding OpenImageCommand}"/>
+                <MenuItem Header="템플릿 이미지 열기" Command="{Binding OpenTemplateImageCommand}"/>
+                <MenuItem Header="저장" Command="{Binding SaveImageCommand}"/>
+                <Separator />
+                <MenuItem Header="작업기록 내보내기" Command="{Binding ExportHistoryCommand}"/>
+                <MenuItem Header="로그 내보내기" Command="{Binding ExportLogCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="되돌리기" Command="{Binding UndoCommand}"/>
+                <MenuItem Header="다시 실행" Command="{Binding RedoCommand}"/>
+                <Separator />
+                <MenuItem Header="복사" Command="{Binding CopyImageCommand}"/>
+                <MenuItem Header="붙여넣기" Command="{Binding PasteImageCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Setting">
+                <MenuItem Header="히스토그램 보기" Command="{Binding ViewHistogramCommand}"/>
+                <MenuItem Header="미니맵 보기" Command="{Binding MinimapCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="자르기" Command="{Binding ApplyCropCommand}"/>
 
-        <Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
-            <TextBlock Text="Defect Image Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        </Border>
+            </MenuItem>
+            <MenuItem Header="_UI Save">
+                <MenuItem Header="단축키 안내"/>
+                <MenuItem Header="정보"/>
+            </MenuItem>
+        </Menu>
 
-    </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+
+            <Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="Defect Image Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+            <Border Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="File Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+
+            <Border Grid.Row="2" Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="Defect Die Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </Border>
+
+        </Grid>
+    </DockPanel>
 </Window>
