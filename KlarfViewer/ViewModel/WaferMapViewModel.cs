@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace KlarfViewer.ViewModel
 {
-    public class MapViewerViewModel
+    public class WaferMapViewModel
     {
+        public WaferMapViewModel() { }
     }
 }

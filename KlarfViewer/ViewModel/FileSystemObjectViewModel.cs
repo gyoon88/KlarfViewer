@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
-namespace KlarfViewer.Model
+namespace KlarfViewer.ViewModel
 {
     public class FileSystemObjectViewModel
     {

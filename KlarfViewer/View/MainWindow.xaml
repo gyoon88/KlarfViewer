@@ -4,41 +4,52 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KlarfViewer"
+        xmlns:vm="clr-namespace:KlarfViewer.ViewModel"
         mc:Ignorable="d"
         Title="KlarfViewer" Height="800" Width="1200" MinHeight="500" MinWidth="1000">
 
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="S" />
+        <KeyBinding Modifiers="Control" Key="C" />
+        <KeyBinding Modifiers="Control" Key="O" />
+        <KeyBinding Modifiers="Control" Key="Z" />
+        <KeyBinding Modifiers="Control" Key="Y" />
+    </Window.InputBindings>
+    
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="열기" Command="{Binding OpenImageCommand}"/>
-                <MenuItem Header="템플릿 이미지 열기" Command="{Binding OpenTemplateImageCommand}"/>
-                <MenuItem Header="저장" Command="{Binding SaveImageCommand}"/>
+                <MenuItem Header="열기" />
+                <MenuItem Header="저장" />
                 <Separator />
-                <MenuItem Header="작업기록 내보내기" Command="{Binding ExportHistoryCommand}"/>
-                <MenuItem Header="로그 내보내기" Command="{Binding ExportLogCommand}"/>
+                <MenuItem Header="작업기록 내보내기" />
+                <MenuItem Header="로그 내보내기" />
             </MenuItem>
             <MenuItem Header="_View">
-                <MenuItem Header="되돌리기" Command="{Binding UndoCommand}"/>
-                <MenuItem Header="다시 실행" Command="{Binding RedoCommand}"/>
-                <Separator />
-                <MenuItem Header="복사" Command="{Binding CopyImageCommand}"/>
-                <MenuItem Header="붙여넣기" Command="{Binding PasteImageCommand}"/>
+                <MenuItem Header="구조화" />
+                <MenuItem Header="클러스터링" />
             </MenuItem>
             <MenuItem Header="_Setting">
-                <MenuItem Header="히스토그램 보기" Command="{Binding ViewHistogramCommand}"/>
-                <MenuItem Header="미니맵 보기" Command="{Binding MinimapCommand}"/>
+                <MenuItem Header="setting" />
+
             </MenuItem>
             <MenuItem Header="_Tools">
-                <MenuItem Header="자르기" Command="{Binding ApplyCropCommand}"/>
+                <MenuItem Header="자르기"/>
 
             </MenuItem>
             <MenuItem Header="_UI Save">
-                <MenuItem Header="단축키 안내"/>
-                <MenuItem Header="정보"/>
+                <MenuItem Header="저장"/>
+                <MenuItem Header="초기화"/>
             </MenuItem>
         </Menu>
 
+        
+        <!-- Viewer -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -50,35 +61,132 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            
+            <!-- Spliter -->
+            <GridSplitter Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
+                  Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                  Background="LightGray" />
+
+            <GridSplitter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                  Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                  Background="LightGray" />
+
+            <!-- Wafer map Viewer -->
             <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto">
-                    <TextBlock Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </ScrollViewer>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"/>
+
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <Viewbox>
+                            <Canvas x:Name="WaferMapViewer">
+                                <Rectangle Fill="#80FF0000" Stroke="Red" StrokeThickness="5" 
+                                    Width="600" Height="350"/>
+                            </Canvas>
+                        </Viewbox>
+                    </ScrollViewer>
+                    
+                </Grid>
+
             </Border>
 
+            <!-- Defct Viewer -->
             <Border Grid.Row="0" Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Defect Image Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </ScrollViewer>
+                    <TextBlock Grid.Row="0" Text="Defect Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"/>
+
+                    <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <Viewbox>
+                            <Canvas x:Name="DefectImageCanvas" Width="600" Height="350">
+                                <Rectangle Fill="#80FF0000" Stroke="Red" StrokeThickness="5"
+                                    Width="600" Height="350"/>
+                            </Canvas>
+                        </Viewbox>
+                    </ScrollViewer>
+                </Grid>
+
             </Border>
-            <GridSplitter Grid.Column="1"/>
-            <GridSplitter Grid.Row="1"/>
-                
+
+            <!-- File List Viewer -->
             <Border Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="6*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="File Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </ScrollViewer>
+                    <TextBlock Text="File List Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"/>
+                    <Border Grid.Row="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="Open Done Folder" Margin="2" Style="{StaticResource FlatButtonStyle}" />
+                            <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource FlatButtonStyle}"/>
+                            <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource FlatButtonStyle}"/>
+                            <Button Grid.Column="3" Content="Gage" Margin="2" Style="{StaticResource FlatButtonStyle}"/>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Row="2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="3*"/>
+                                
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </Border>
+
+                </Grid>
             </Border>
 
+            <!-- Defect Info Viewer -->
             <Border Grid.Row="2" Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="Defect Die Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </ScrollViewer>
+                    <TextBlock Text="Defect Info Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                    <ListBox>
+                        
+                    </ListBox>
+                       
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                    </Grid>
+                </Grid>
             </Border>
 
         </Grid>

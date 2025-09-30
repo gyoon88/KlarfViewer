@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlarfViewer.Service
+namespace KlarfViewer.Model
 {
-    public class NavigationService
+    internal class DrawDies
     {
     }
 }

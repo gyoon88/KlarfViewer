@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlarfViewer.Service
+namespace KlarfViewer.ViewModel
 {
-    public class NavigationService
+    public class DefectListViewModel
     {
+        public DefectListViewModel()
+        {
+
+        }
     }
 }
