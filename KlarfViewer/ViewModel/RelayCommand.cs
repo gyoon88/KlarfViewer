@@ -26,19 +26,14 @@ namespace KlarfViewer.ViewModel
 
         public bool CanExecute(object? parameter)
         {
-            // To prevent exceptions when the parameter is of a different type,
-            // we check the type before casting.
             if (parameter is T validParameter)
             {
                 return _canExecute == null || _canExecute(validParameter);
             }
-            // If the parameter is null and T is a reference type, we can proceed.
             if (parameter == null && !typeof(T).IsValueType)
             {
-                // The cast (T?)parameter will be null, which might be acceptable for the predicate.
                 return _canExecute == null || _canExecute((T?)parameter);
             }
-            // In other cases, the execution is not possible.
             return false;
         }
 

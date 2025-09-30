@@ -42,6 +42,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -49,20 +50,35 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
+            
+            
             <Border Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                    <TextBlock Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ScrollViewer>
             </Border>
 
-            <Border Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="Defect Image Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Border Grid.Row="0" Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+
+                    <TextBlock Text="Defect Image Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ScrollViewer>
             </Border>
+            <GridSplitter Grid.Column="1"/>
+            <GridSplitter Grid.Row="1"/>
+                
             <Border Grid.Row="2" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="File Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+
+                    <TextBlock Text="File Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ScrollViewer>
             </Border>
 
-            <Border Grid.Row="2" Grid.Column="1" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="Defect Die Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            <Border Grid.Row="2" Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+
+                    <TextBlock Text="Defect Die Viewer" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </ScrollViewer>
             </Border>
 
         </Grid>

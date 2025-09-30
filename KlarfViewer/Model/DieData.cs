@@ -29,16 +29,16 @@ namespace KlarfViewer.Model
         /// 이 Die에 속한 모든 Defect(결함)들의 리스트입니다.
         /// 파싱이 끝난 후, 전체 Defect 리스트를 순회하며 채워줍니다.
         /// </summary>
-        public List<Defect> Defects { get; set; }
+        public List<DefectInfo> Defects { get; set; }
 
         /// <summary>
         /// Die 객체 생성자입니다.
         /// </summary>
-        public Die()
+        public DieData()
         {
             // 객체가 처음 만들어질 때는 불량이 없는 상태로 초기화합니다.
             IsDefective = false;
-            Defects = new List<Defect>();
+            Defects = new List<DefectInfo>();
         }
     }
 }
