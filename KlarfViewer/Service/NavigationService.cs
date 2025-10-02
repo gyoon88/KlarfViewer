@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace KlarfViewer.Service
 {
+    /// <summary>
+    /// Use for Shift Die which map viewer,defect viewer
+    /// </summary>
     public class NavigationService
     {
     }

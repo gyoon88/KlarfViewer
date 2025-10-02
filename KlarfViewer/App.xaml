@@ -4,6 +4,31 @@
              xmlns:local="clr-namespace:KlarfViewer"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+
+        <!-- 🎨 테마 팔레트 (Neutral + Modern) -->
+        <Color x:Key="AppPrimaryColor">#FF2D2D2D</Color>
+        <!-- 거의 블랙에 가까운 다크 그레이 -->
+        <Color x:Key="AppSecondaryColor">#FF3C3C3C</Color>
+        <!-- 중간 톤 그레이 (패널/배경) -->
+        <Color x:Key="AppAccentColor">#FF4A90E2</Color>
+        <!-- 차분한 블루 (강조) -->
+        <Color x:Key="AppBorderColor">#FF5A5A5A</Color>
+        <!-- 경계선용 그레이 -->
+        <Color x:Key="AppForegroundColor">#FFEAEAEA</Color>
+        <!-- 텍스트용 라이트 그레이 (거의 흰색) -->
+        <Color x:Key="AppDisabledColor">#FF7A7A7A</Color>
+        <!-- 비활성화 텍스트/버튼 -->
+
+        <!-- Brush 변환 -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource AppPrimaryColor}"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource AppSecondaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AppAccentColor}"/>
+        <SolidColorBrush x:Key="BorderBrushColor" Color="{StaticResource AppBorderColor}"/>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource AppForegroundColor}"/>
+        <SolidColorBrush x:Key="DisabledBrush" Color="{StaticResource AppDisabledColor}"/>
+
+
+
         <Style x:Key="ModernButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#FFE8E8E8"/>
             <Setter Property="Foreground" Value="#FF333333"/>

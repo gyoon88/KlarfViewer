@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KlarfViewer.Service
+namespace KlarfViewer.ViewModel.Command
 {
-    public class ServeSpecificService
+    public class DieShiftCommand
     {
     }
 }

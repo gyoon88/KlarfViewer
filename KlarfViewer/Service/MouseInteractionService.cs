@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KlarfViewer.Service
 {
-    public class ServeSpecificService
+    internal class MouseInteractionService
     {
     }
 }

@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace KlarfViewer.ViewModel
 {
-    public class FileListViewModel
+    public class FileListViewModel:BaseViewModel
     {
         // View의 TreeView와 바인딩될 최상위 아이템 리스트
         public ObservableCollection<FileSystemObjectViewModel> Items { get; set; }

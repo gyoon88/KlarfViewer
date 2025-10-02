@@ -8,6 +8,7 @@ namespace KlarfViewer.ViewModel
 {
     public class MainViewModel:BaseViewModel
     {
+        
         public WaferMapViewModel? WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
         public FileListViewModel FileViewerVM { get; private set; }
@@ -19,8 +20,5 @@ namespace KlarfViewer.ViewModel
             FileViewerVM = new FileListViewModel();
             DefectListVM = new DefectListViewModel();
         }
-
-
-
     }
 }
