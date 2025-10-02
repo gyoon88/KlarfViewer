@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace KlarfViewer.Model
 {
-    // ListView에 표시될 '파일' 항목을 나타내는 클래스
     public class KlarfFileItem
     {
         // Connect for checkbox in on ui
