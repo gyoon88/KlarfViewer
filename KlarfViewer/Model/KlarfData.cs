@@ -7,6 +7,9 @@ namespace KlarfViewer.Model
 {
     public class KlarfData
     {
+        // Klarf 파일의 전체 경로
+        public string FilePath { get; set; }
+
         // 웨이퍼 정보
         public WaferInfo Wafer { get; set; }
 

@@ -7,27 +7,34 @@ using System.Threading.Tasks;
 
 namespace KlarfViewer.ViewModel
 {
-    public class WaferMapViewModel:BaseViewModel
+    public class WaferMapViewModel : BaseViewModel
     {
+        public WaferInfo WaferInfomation { get; private set; }
+        public List<KlarfViewer.Model.DieInfo> Dies { get; private set; }
 
-        // wafer 변수
-        private WaferInfo waferInfomation;
-
-        // 속성
-        public WaferInfo WaferInfomation
+        private DefectInfo _selectedDefect;
+        public DefectInfo SelectedDefect
         {
-            get => waferInfomation;
-            set => SetProperty(ref waferInfomation, value);
-
+            get => _selectedDefect;
+            set
+            {
+                _selectedDefect = value;
+                OnPropertyChanged(nameof(SelectedDefect));
+            }
         }
-        // 생성자
-        public WaferMapViewModel()
-        { 
-            
-        }
-    
-        
 
-        // 함수
+        public WaferMapViewModel(WaferInfo waferInfo = null, List<KlarfViewer.Model.DieInfo> dies = null)
+        {
+            WaferInfomation = waferInfo ?? new WaferInfo();
+            Dies = dies ?? new List<KlarfViewer.Model.DieInfo>();
+        }
+
+        public void UpdateWaferData(KlarfData klarfData)
+        {
+            WaferInfomation = klarfData.Wafer;
+            Dies = klarfData.Dies;
+            OnPropertyChanged(nameof(WaferInfomation));
+            OnPropertyChanged(nameof(Dies));
+        }
     }
 }

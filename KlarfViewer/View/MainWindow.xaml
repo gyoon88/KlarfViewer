@@ -76,14 +76,29 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"  Foreground="White"/>
 
-                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <Viewbox>
-                            <Canvas x:Name="WaferMapViewer">
-                                <Rectangle Fill="#80FF0000" Stroke="Red" StrokeThickness="5" 
-                                    Width="600" Height="350"/>
-                            </Canvas>
-                        </Viewbox>
-                    </ScrollViewer>
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding WaferMapVM.Dies}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DieInfo}">
+                                <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1">
+                                    <Rectangle.Style>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="Fill" Value="Gray"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDefective}" Value="True">
+                                                    <Setter Property="Fill" Value="Red"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Rectangle.Style>
+                                </Rectangle>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                 </Grid>
 
@@ -101,10 +116,7 @@
 
                     <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Viewbox>
-                            <Canvas x:Name="DefectImageCanvas" Width="500" Height="300">
-                                <Rectangle Fill="#80FF0000" Stroke="Red" StrokeThickness="5"
-                                    Width="600" Height="350"/>
-                            </Canvas>
+                            <Image Source="{Binding DefectImageVM.DefectImage}" Stretch="Uniform"/>
                         </Viewbox>
                     </ScrollViewer>
                 </Grid>
@@ -130,7 +142,7 @@
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="Open Done Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" />
+                            <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileViewerVM.OpenFolderCommand}" />
                             <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
                             <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
                             <Button Grid.Column="3" Content="Gage" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
@@ -138,17 +150,24 @@
 
                     </Border>
                     <Grid Grid.Row="2" >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <ListBox Grid.Column="0"  BorderBrush="{StaticResource BorderBrushColor}" Background="{StaticResource SecondaryBrush}" Margin="5,5,5,5">
-
-                        </ListBox>
-                        <ListBox Grid.Column="1"  BorderBrush="{StaticResource BorderBrushColor}" Background="{StaticResource SecondaryBrush}" Margin="0,5,5,5">
-
-                        </ListBox>
-
+                        <TreeView x:Name="FileTreeView" 
+                                  ItemsSource="{Binding FileViewerVM.Items}"
+                                  Background="{StaticResource SecondaryBrush}" 
+                                  Foreground="White"
+                                  Margin="5"
+                                  SelectedItemChanged="FileTreeView_SelectedItemChanged">
+                            <TreeView.ItemContainerStyle>
+                                <!-- Bind SelectedItem to ViewModel -->
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type vm:FileSystemObjectViewModel}" ItemsSource="{Binding Children}">
+                                    <TextBlock Text="{Binding Name}" />
+                                </HierarchicalDataTemplate>
+                            </TreeView.Resources>
+                        </TreeView>
                     </Grid>
 
 
@@ -212,9 +231,14 @@
 
 
                         </Grid>
-                        <ListBox Grid.Row="1" Margin="5,0,5,5" BorderBrush="{StaticResource BorderBrushColor}" Background="{StaticResource SecondaryBrush}">
-
-                        </ListBox>
+                        <DataGrid Grid.Row="1" Margin="5,0,5,5" 
+                                  ItemsSource="{Binding DefectListVM.DefectSpec}"
+                                  SelectedItem="{Binding DefectListVM.SelectedDefect, Mode=TwoWay}"
+                                  IsReadOnly="True"
+                                  AutoGenerateColumns="True"
+                                  Background="{StaticResource SecondaryBrush}" 
+                                  BorderBrush="{StaticResource BorderBrushColor}">
+                        </DataGrid>
 
                     </Grid>
                 </Border>

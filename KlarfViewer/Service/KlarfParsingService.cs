@@ -22,7 +22,7 @@ namespace KlarfViewer.Service
                 throw new FileNotFoundException("Klarf 파일을 찾을 수 없습니다.", filePath);
             }
             // initialize KlarfData instance and read klarf file
-            KlarfData klarfData = new KlarfData();
+            KlarfData klarfData = new KlarfData { FilePath = filePath };
             var lines = File.ReadAllLines(filePath);
 
             // Line index 

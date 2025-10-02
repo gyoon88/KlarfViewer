@@ -14,10 +14,14 @@ namespace KlarfViewer.ViewModel
         // 폴더인 경우에만 여기에 아이템이 추가
         public ObservableCollection<FileSystemObjectViewModel> Children { get; set; }
 
+        public bool IsFile { get; }
+
         public FileSystemObjectViewModel(string path)
         {
             FullPath = path;
             Name = Path.GetFileName(path);
+            IsFile = File.Exists(path);
+
             // 파일의 경우 이름이 없으면 전체 경로를 이름으로 사용 (예: C:\)
             if (string.IsNullOrEmpty(Name))
                 Name = FullPath;
