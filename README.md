@@ -39,7 +39,7 @@
 - **FR-3.1 (불량 리스트 표시)**: 로드된 Klarf 파일의 모든 Defect 정보를 `DataGrid` 컨트롤에 리스트 형태로 출력해야 한다.
 - **FR-3.2 (상세 정보 컬럼)**: `DataGrid`는 최소한 `DEFECTID`, `XREL`, `YREL`, `IMAGEID`, `Die Index` 등의 핵심 정보를 컬럼으로 표시해야 한다.
 - **FR-3.3 (불량 선택 기능)**: 사용자는 **`DataGrid`**에서 마우스 클릭으로 특정 Defect 항목을 선택할 수 있어야 한다.
-- **FR-3.4 (선택 정보 연동)**: 항목 선택 시, 선택된 Defect의 상세 정보가 **`Defect Image Viewer`**와 **`Wafer** **Map Viewer**`에 즉시 반영되어야 한다.
+- **FR-3.4 (선택 정보 연동)**: 항목 선택 시, 선택된 Defect의 상세 정보가 **`Defect Image Viewer`**와 **`Wafer** **Map Viewer`**에 즉시 반영되어야 한다.
     - **`Defect Image Viewer`**: 해당 Defect의 TIF 이미지로 변경
     - **`Wafer Map Viewer`**: 해당 Defect의 위치 강조
 - **FR-3.5 (불량 이동 버튼)**:
@@ -51,7 +51,7 @@
 
 ### **FR-4: Defect Image Viewer**
 
-- **FR-4.1 (TIF 이미지 표시)**: 선택된 Defect에 해당하는 TIF(.tif) 이미지를 표시해야 한다. WPF의 **`TiffBitmapDecoder`**를 사용하여 이미지를 로드한다.
+- **FR-4.1 (TIF 이미지 표시)**: 선택된 Defect에 해당하는 TIF(.tif) 이미지를 표시해야 한다. WPF의 **`TiffBitmapDecoder` **를 사용하여 이미지를 로드한다.
 - **FR-4.2 (이미지 확대/축소)**:
     - 사용자는 **Bar UI(Slider)** 또는 버튼을 통해 **이미지의 배율**을 조절할 수 있어야 한다.
     - **확대/축소**는 현재 화면의 중앙을 기준으로 수행되어야 한다.
