@@ -6,32 +6,52 @@ namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        private readonly KlarfParsingService _klarfParser;
-        private KlarfData _currentKlarfData;
+        private readonly KlarfParsingService klarfParser;
+        private KlarfData currentKlarfData;
+        private WaferInfo waferInfo;
 
         public WaferMapViewModel WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
-        public FileListViewModel FileViewerVM { get; private set; }
+        public FileListViewModel FileListVM { get; private set; }
         public DefectListViewModel DefectListVM { get; private set; }
+
+        public WaferInfo WaferInfomation 
+        { 
+            get => waferInfo;
+            set => SetProperty(ref waferInfo, value);
+        }
 
         public MainViewModel()
         {
-            _klarfParser = new KlarfParsingService();
+            klarfParser = new KlarfParsingService();
 
             WaferMapVM = new WaferMapViewModel();
             DefectImageVM = new DefectImageViewModel();
-            FileViewerVM = new FileListViewModel();
-            DefectListVM = new DefectListViewModel();
+            FileListVM = new FileListViewModel();
+            DefectListVM = new DefectListViewModel(WaferInfomation);
 
-            FileViewerVM.FileSelected += FileViewerVM_FileSelected;
+            FileListVM.FileSelected += FileViewerVM_FileSelected;
             DefectListVM.PropertyChanged += DefectListVM_PropertyChanged;
+            WaferMapVM.DieSelected += WaferMapVM_DieSelected;
         }
 
         private void FileViewerVM_FileSelected(string filePath)
         {
-            _currentKlarfData = _klarfParser.Parse(filePath);
-            WaferMapVM.UpdateWaferData(_currentKlarfData);
-            DefectListVM.UpdateDefects(_currentKlarfData);
+            currentKlarfData = klarfParser.Parse(filePath);
+            WaferMapVM.UpdateWaferData(currentKlarfData);
+            DefectListVM.UpdateDefects(currentKlarfData);
+        }
+
+        private void WaferMapVM_DieSelected(DieViewModel die)
+        {
+            if (die == null) return;
+
+            // 클릭된 다이와 동일한 인덱스를 가진 첫 번째 결함을 찾음
+            var correspondingDefect = DefectListVM.DefectSpec.FirstOrDefault(d => d.XIndex == die.XIndex && d.YIndex == die.YIndex);
+            if (correspondingDefect != null)
+            {
+                DefectListVM.SelectedDefect = correspondingDefect;
+            }
         }
 
         private void DefectListVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -39,11 +59,11 @@ namespace KlarfViewer.ViewModel
             if (e.PropertyName == nameof(DefectListViewModel.SelectedDefect))
             {
                 var selectedDefect = DefectListVM.SelectedDefect;
-                if (selectedDefect != null && _currentKlarfData != null)
+                if (selectedDefect != null && currentKlarfData != null)
                 {
                     WaferMapVM.SelectedDefect = selectedDefect;
 
-                    string tiffFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_currentKlarfData.FilePath), _currentKlarfData.Wafer.TiffFilename);
+                    string tiffFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(currentKlarfData.FilePath), currentKlarfData.Wafer.TiffFilename);
                     DefectImageVM.UpdateImage(tiffFilePath, selectedDefect.ImageId);
                 }
             }

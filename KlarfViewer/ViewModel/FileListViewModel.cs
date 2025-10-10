@@ -1,7 +1,8 @@
-
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 
 namespace KlarfViewer.ViewModel
@@ -10,66 +11,100 @@ namespace KlarfViewer.ViewModel
     {
         public event Action<string> FileSelected;
 
-        private FileSystemObjectViewModel _selectedItem;
-        public FileSystemObjectViewModel SelectedItem
+        private FileSystemObjectViewModel selectedDirectory;
+        public FileSystemObjectViewModel SelectedDirectory
         {
-            get => _selectedItem;
+            get => selectedDirectory;
             set
             {
-                _selectedItem = value;
-                OnPropertyChanged(nameof(SelectedItem));
-                if (value != null && value.IsFile && Path.GetExtension(value.FullPath).Equals(".klarf", StringComparison.OrdinalIgnoreCase))
+                if (SetProperty(ref selectedDirectory, value) && value != null)
                 {
-                    FileSelected?.Invoke(value.FullPath);
+                    LoadFiles(value);
                 }
             }
         }
 
-        public ObservableCollection<FileSystemObjectViewModel> Items { get; set; }
+        private FileSystemObjectViewModel selectedFile;
+        public FileSystemObjectViewModel SelectedFile
+        {
+            get => selectedFile;
+            set
+            {
+                if (SetProperty(ref selectedFile, value) && value != null && !value.IsDirectory)
+                {
+                    var extension = Path.GetExtension(value.FullPath);
+                    if (extension.Equals(".klarf", StringComparison.OrdinalIgnoreCase) ||
+                        extension.Equals(".001", StringComparison.OrdinalIgnoreCase))
+                    {
+                        FileSelected?.Invoke(value.FullPath);
+                    }
+                }
+            }
+        }
+
+        public ObservableCollection<FileSystemObjectViewModel> Directories { get; }
+        public ObservableCollection<FileSystemObjectViewModel> Files { get; }
+
         public ICommand OpenFolderCommand { get; }
 
         public FileListViewModel()
         {
-            Items = new ObservableCollection<FileSystemObjectViewModel>();
+            Directories = new ObservableCollection<FileSystemObjectViewModel>();
+            Files = new ObservableCollection<FileSystemObjectViewModel>();
             OpenFolderCommand = new RelayCommand(ExecuteOpenFolder);
         }
 
-        private void ExecuteOpenFolder(object obj)
+        private void ExecuteOpenFolder()
         {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            var dialog = new VistaFolderBrowserDialog
+            {
+                Description = "Select a folder.",
+                UseDescriptionForTitle = true
+            };
+
+            if (dialog.ShowDialog() == true)
             {
                 string selectedPath = dialog.SelectedPath;
-                Items.Clear();
-                var rootNode = new FileSystemObjectViewModel(selectedPath);
-                LoadSubDirectoriesAndFiles(rootNode);
-                Items.Add(rootNode);
+                Directories.Clear();
+                Files.Clear();
+                var rootNode = new FileSystemObjectViewModel(selectedPath, isDirectory: true);
+                LoadSubDirectories(rootNode);
+                Directories.Add(rootNode);
+                SelectedDirectory = rootNode;
             }
         }
 
-        private void LoadSubDirectoriesAndFiles(FileSystemObjectViewModel parentNode)
+        private void LoadSubDirectories(FileSystemObjectViewModel parentNode)
         {
             try
             {
                 foreach (var dirPath in Directory.GetDirectories(parentNode.FullPath))
                 {
-                    var subDirNode = new FileSystemObjectViewModel(dirPath);
-                    LoadSubDirectoriesAndFiles(subDirNode);
-                    if (subDirNode.Children.Count > 0) 
-                    {
-                        parentNode.Children.Add(subDirNode);
-                    }
-                }
-
-                foreach (var filePath in Directory.GetFiles(parentNode.FullPath, "*.klarf"))
-                {
-                    var fileNode = new FileSystemObjectViewModel(filePath);
-                    parentNode.Children.Add(fileNode);
+                    var subDirNode = new FileSystemObjectViewModel(dirPath, isDirectory: true);
+                    LoadSubDirectories(subDirNode); 
+                    parentNode.Children.Add(subDirNode);
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                // Ignore folders with no access rights
+                // Ignore folders without access permissions
+            }
+        }
+
+        private void LoadFiles(FileSystemObjectViewModel directoryNode)
+        {
+            Files.Clear();
+            try
+            {
+                foreach (var filePath in Directory.GetFiles(directoryNode.FullPath))
+                {
+                    var fileNode = new FileSystemObjectViewModel(filePath, isDirectory: false);
+                    Files.Add(fileNode);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Ignore folders without access permissions
             }
         }
     }

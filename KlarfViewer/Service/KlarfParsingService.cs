@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using KlarfViewer.Model;
 
 namespace KlarfViewer.Service
@@ -87,6 +88,9 @@ namespace KlarfViewer.Service
                             // 파일의 끝에 도달했으므로 루프를 종료
                             lineIndex = lines.Length;
                             break;
+                        default:
+                            // 처리하지 않는 다른 모든 키워드는 무시하고 넘어감
+                            break;
                     }
                 }
                 catch (Exception ex)
@@ -94,7 +98,7 @@ namespace KlarfViewer.Service
                     var log = $"Error parsing line {lineIndex + 1}: '{lines[lineIndex]}'. Error: {ex.Message}";
                     // 파싱 중 오류가 발생하면 콘솔에 기록하거나 로그 출력
                     Console.WriteLine(log);
-                    throw new FileNotFoundException("Klarf 파싱중 에러가 발생하였습니다.", log);
+                    MessageBox.Show("Klarf 파싱중 에러가 발생하였습니다.", log);
                 }
 
                 lineIndex++;
@@ -113,7 +117,8 @@ namespace KlarfViewer.Service
                 var currentLineIndex = startIndex + i;
                 if (currentLineIndex >= lines.Length) break;
 
-                var tokens = lines[currentLineIndex].Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var line = lines[currentLineIndex].Trim();
+                var tokens = line.TrimEnd(';').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (tokens.Length >= 2)
                 {
                     dies.Add(new DieInfo
@@ -153,8 +158,8 @@ namespace KlarfViewer.Service
                 defect.XSize = GetValue<double>(tokens, headerMap, "XSIZE");
                 defect.YSize = GetValue<double>(tokens, headerMap, "YSIZE");
 
-                // IMAGELIST는 여러 개일 수 있음, 여기서는 첫 번째(대표) ID만 가져옴
-                defect.ImageId = GetValue<int>(tokens, headerMap, "IMAGECOUNT") > 0 ? GetValue<int>(tokens, headerMap, "IMAGELIST") : -1;
+                // ImageId는 DefectID와 동일하다고 가정 (사용자 피드백)
+                defect.ImageId = GetValue<int>(tokens, headerMap, "DEFECTID");
 
                 defects.Add(defect);
                 currentIndex++;

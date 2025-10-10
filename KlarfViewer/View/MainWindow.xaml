@@ -5,12 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KlarfViewer"
         xmlns:vm="clr-namespace:KlarfViewer.ViewModel"
+        xmlns:model="clr-namespace:KlarfViewer.Model"
         mc:Ignorable="d"
         Title="KlarfViewer" Height="800" Width="1200" MinHeight="500" MinWidth="1000">
-
-    <Window.DataContext>
-        <vm:MainViewModel/>
-    </Window.DataContext>
 
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="S" />
@@ -76,29 +73,50 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"  Foreground="White"/>
 
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding WaferMapVM.Dies}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:DieInfo}">
-                                <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness="1">
+                    <Viewbox Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding WaferMapVM.Dies}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="{Binding WaferMapVM.WaferMapWidth}" Height="{Binding WaferMapVM.WaferMapHeight}" />
+                                </ItemsPanelTemplate>                            </ItemsControl.ItemsPanel>
+
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+
+                            <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DieViewModel}">
+                                <Rectangle Width="{Binding Width}" Height="{Binding Height}" Stroke="Black" StrokeThickness="1">
+                                    <Rectangle.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" 
+                                                      Command="{Binding DataContext.WaferMapVM.SelectDieCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                    </Rectangle.InputBindings>
                                     <Rectangle.Style>
                                         <Style TargetType="Rectangle">
                                             <Setter Property="Fill" Value="Gray"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
                                             <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDefective}" Value="False">
+                                                    <Setter Property="Cursor" Value="Arrow"/>
+                                                </DataTrigger>
                                                 <DataTrigger Binding="{Binding IsDefective}" Value="True">
                                                     <Setter Property="Fill" Value="Red"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Fill" Value="{StaticResource AccentBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Rectangle.Style>
                                 </Rectangle>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Viewbox>
 
                 </Grid>
 
@@ -115,9 +133,27 @@
                     <TextBlock Grid.Row="0" Text="Defect Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14" Foreground="White"/>
 
                     <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <Viewbox>
-                            <Image Source="{Binding DefectImageVM.DefectImage}" Stretch="Uniform"/>
-                        </Viewbox>
+                        <Grid>
+                            <Viewbox>
+                                <Image Source="{Binding DefectImageVM.DefectImage}" Stretch="Uniform"/>
+                            </Viewbox>
+
+                            <TextBlock Text="{Binding DefectImageVM.ImageLoadingError}" Foreground="Red" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DefectImageVM.ImageLoadingError}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DefectImageVM.ImageLoadingError}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                     </ScrollViewer>
                 </Grid>
 
@@ -142,32 +178,58 @@
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileViewerVM.OpenFolderCommand}" />
+                            <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.OpenFolderCommand}" />
                             <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
                             <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
-                            <Button Grid.Column="3" Content="Gage" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
+                            <!-- Gage 에는 뭐가 들어갈지 모르겠어서일단 남겨두기 -->
+                            <Button Grid.Column="3" Content="Gage" Margin="2" Style="{StaticResource ModernButtonStyle}"/> 
+                            
+
                         </Grid>
 
                     </Border>
-                    <Grid Grid.Row="2" >
-                        <TreeView x:Name="FileTreeView" 
-                                  ItemsSource="{Binding FileViewerVM.Items}"
-                                  Background="{StaticResource SecondaryBrush}" 
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="150"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="2*" MinWidth="200"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Directory Tree -->
+                        <TreeView Grid.Column="0"
+                                  ItemsSource="{Binding FileListVM.Directories}"
+                                  Background="{StaticResource SecondaryBrush}"
                                   Foreground="White"
                                   Margin="5"
                                   SelectedItemChanged="FileTreeView_SelectedItemChanged">
                             <TreeView.ItemContainerStyle>
-                                <!-- Bind SelectedItem to ViewModel -->
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                                 </Style>
                             </TreeView.ItemContainerStyle>
-                            <TreeView.Resources>
-                                <HierarchicalDataTemplate DataType="{x:Type vm:FileSystemObjectViewModel}" ItemsSource="{Binding Children}">
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                                     <TextBlock Text="{Binding Name}" />
                                 </HierarchicalDataTemplate>
-                            </TreeView.Resources>
+                            </TreeView.ItemTemplate>
                         </TreeView>
+
+                        <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="{StaticResource BorderBrushColor}" />
+
+                        <!-- File List -->
+                        <ListView Grid.Column="2"
+                                  ItemsSource="{Binding FileListVM.Files}"
+                                  SelectedItem="{Binding FileListVM.SelectedFile, Mode=TwoWay}"
+                                  Background="{StaticResource SecondaryBrush}"
+                                  Foreground="White"
+                                  Margin="5">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </Grid>
 
 
@@ -190,17 +252,17 @@
                             </Grid.ColumnDefinitions>
                             <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
                                 <StackPanel>
-                                    <TextBlock/>
+                                    <TextBlock Text="Sample Infomation" FontSize="14"/>
+                                    <TextBlock Text="{Binding DefectListVM.Wafer.FileTimestamp, StringFormat='Wafer ID: {0}'}" />
                                     <Separator/>
 
-                                    <TextBlock/>
+                                    <TextBlock Text="{Binding DefectListVM.Wafer.WaferID, StringFormat='Wafer ID: {0}'}" />
                                     <Separator/>
 
-                                    <TextBlock/>
+                                    <TextBlock Text="{Binding DefectListVM.Wafer.LotID , StringFormat='LetID: {0}'}"/>
                                     <Separator/>
 
-                                    <TextBlock/>
-                                    
+                                    <TextBlock Text="{Binding DefectListVM.Wafer.LotID, StringFormat='Device ID: {0}'}"/>                                    
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="1" Margin="5,0,0,0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
@@ -215,21 +277,19 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Button Grid.Row="0" Grid.Column="0"/>
-                                    <Button Grid.Row="1" Grid.Column="0"/>
-                                    <Button Grid.Row="2" Grid.Column="0"/>
-                                    <Button Grid.Row="0" Grid.Column="2"/>
-                                    <Button Grid.Row="1" Grid.Column="2"/>
-                                    <Button Grid.Row="2" Grid.Column="2"/>
-
-                                    <TextBlock Grid.Row="0" Grid.Column="1" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" />
-                                    <TextBlock Grid.Row="2" Grid.Column="1" />
+                                    <Button Grid.Row="1" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}/{1}">
+                                                <Binding Path="DefectListVM.CurrentDefectIndex"/>
+                                                <Binding Path="DefectListVM.TotalDefectCount"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <Button Grid.Row="1" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
 
                                 </Grid>
                             </Border>
-
-
                         </Grid>
                         <DataGrid Grid.Row="1" Margin="5,0,5,5" 
                                   ItemsSource="{Binding DefectListVM.DefectSpec}"
@@ -243,8 +303,6 @@
                     </Grid>
                 </Border>
             </Expander>
-
-
         </Grid>
     </DockPanel>
 </Window>
