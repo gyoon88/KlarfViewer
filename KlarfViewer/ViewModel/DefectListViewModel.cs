@@ -72,7 +72,6 @@ namespace KlarfViewer.ViewModel
             // wafer information update
             WaferInfo wafer = waferInfo;
 
-
             PreviousDefectCommand = new RelayCommand(ExecutePreviousDefect, CanExecutePreviousDefect);
             NextDefectCommand = new RelayCommand(ExecuteNextDefect, CanExecuteNextDefect);
         }
@@ -106,8 +105,16 @@ namespace KlarfViewer.ViewModel
             SelectedDefect = DefectSpec[currentIndex - 1];
         }
 
-        public void UpdateDefects(KlarfData klarfData)
+        public void UpdateData(KlarfData klarfData)
         {
+            //Wafer = klarfData.Wafer; // Debugging
+            Wafer = new WaferInfo
+            {
+                WaferID = "DEBUG_WAFER_ID",
+                LotID = "DEBUG_LOT_ID",
+                FileTimestamp = DateTime.Now
+            };
+
             DefectSpec = new ObservableCollection<DefectInfo>(klarfData.Defects);
             TotalDefectCount = DefectSpec.Count;
             SelectedDefect = DefectSpec.FirstOrDefault();

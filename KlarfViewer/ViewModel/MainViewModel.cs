@@ -28,7 +28,8 @@ namespace KlarfViewer.ViewModel
             WaferMapVM = new WaferMapViewModel();
             DefectImageVM = new DefectImageViewModel();
             FileListVM = new FileListViewModel();
-            DefectListVM = new DefectListViewModel(WaferInfomation);
+            waferInfo = new WaferInfo();
+            DefectListVM = new DefectListViewModel(waferInfo);
 
             FileListVM.FileSelected += FileViewerVM_FileSelected;
             DefectListVM.PropertyChanged += DefectListVM_PropertyChanged;
@@ -39,7 +40,7 @@ namespace KlarfViewer.ViewModel
         {
             currentKlarfData = klarfParser.Parse(filePath);
             WaferMapVM.UpdateWaferData(currentKlarfData);
-            DefectListVM.UpdateDefects(currentKlarfData);
+            DefectListVM.UpdateData(currentKlarfData);
         }
 
         private void WaferMapVM_DieSelected(DieViewModel die)

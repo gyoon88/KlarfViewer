@@ -253,16 +253,25 @@
                             <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
                                 <StackPanel>
                                     <TextBlock Text="Sample Infomation" FontSize="14"/>
-                                    <TextBlock Text="{Binding DefectListVM.Wafer.FileTimestamp, StringFormat='Wafer ID: {0}'}" />
+                                    <TextBlock Margin="2">
+                                        <Run Text="Timestamp: " FontWeight="Bold"/>
+                                        <Run Text="{Binding DefectListVM.Wafer.FileTimestamp}"/>
+                                    </TextBlock>
                                     <Separator/>
-
-                                    <TextBlock Text="{Binding DefectListVM.Wafer.WaferID, StringFormat='Wafer ID: {0}'}" />
+                                    <TextBlock Margin="2">
+                                        <Run Text="Wafer ID: " FontWeight="Bold"/>
+                                        <Run Text="{Binding DefectListVM.Wafer.WaferID}"/>
+                                    </TextBlock>
                                     <Separator/>
-
-                                    <TextBlock Text="{Binding DefectListVM.Wafer.LotID , StringFormat='LetID: {0}'}"/>
+                                    <TextBlock Margin="2">
+                                        <Run Text="LotID: " FontWeight="Bold"/>
+                                        <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
+                                    </TextBlock>
                                     <Separator/>
-
-                                    <TextBlock Text="{Binding DefectListVM.Wafer.LotID, StringFormat='Device ID: {0}'}"/>                                    
+                                    <TextBlock Margin="2">
+                                        <Run Text="Device ID: " FontWeight="Bold"/>
+                                        <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
+                                    </TextBlock>                                    
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="1" Margin="5,0,0,0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
