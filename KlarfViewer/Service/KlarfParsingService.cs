@@ -22,81 +22,83 @@ namespace KlarfViewer.Service
             {
                 throw new FileNotFoundException("Klarf 파일을 찾을 수 없습니다.", filePath);
             }
-            // initialize KlarfData instance and read klarf file
+
             KlarfData klarfData = new KlarfData { FilePath = filePath };
             var lines = File.ReadAllLines(filePath);
-
-            // Line index 
             int lineIndex = 0;
 
-            while (lineIndex < lines.Length)            {
-                var line = lines[lineIndex].Trim(); // trimming for tokenization                
-                var tokens = line.TrimEnd(';').Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries); // tokenization
+            while (lineIndex < lines.Length)
+            {
+                var line = lines[lineIndex].Trim();
 
-                // Jump Empty Lines
-                if (tokens.Length == 0)
+                if (string.IsNullOrEmpty(line))
                 {
                     lineIndex++;
-                    continue; 
+                    continue;
                 }
 
-                var keyword = tokens[0];
+                string keyword;
+                string[] values;
+
+                int firstSpace = line.IndexOf(' ');
+                if (firstSpace == -1)
+                {
+                    keyword = line.TrimEnd(';');
+                    values = new string[0];
+                }
+                else
+                {
+                    keyword = line.Substring(0, firstSpace);
+                    var remaining = line.Substring(firstSpace + 1).Trim().TrimEnd(';');
+                    values = remaining.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                }
 
                 try
                 {
-                    switch (keyword)
+                    switch (keyword.ToUpper())
                     {
-                        case "WaferID":
-                            klarfData.Wafer.WaferID = tokens[1].Trim('"');
+                        case "WAFERID":
+                            klarfData.Wafer.WaferID = values[0].Trim('"');
                             break;
-                        case "LotID":
-                            klarfData.Wafer.LotID = tokens[1].Trim('"');
+                        case "LOTID":
+                            klarfData.Wafer.LotID = values[0].Trim('"');
                             break;
-                        case "Slot":
-                            klarfData.Wafer.Slot = int.Parse(tokens[1]);
+                        case "SLOT":
+                            klarfData.Wafer.Slot = int.Parse(values[0]);
                             break;
-                        case "FileTimestamp":
-                            klarfData.Wafer.FileTimestamp = DateTime.ParseExact(tokens[1] + " " + tokens[2], "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture); // Data Pharsing the form "08-18-2023 16:19:42"
+                        case "FILETIMESTAMP":
+                            string timestamp = values[0] + " " + values[1];
+                            klarfData.Wafer.FileTimestamp = DateTime.ParseExact(timestamp, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                             break;
-                        case "TiffFilename":
-                            klarfData.Wafer.TiffFilename = tokens[1];
+                        case "TIFFFILENAME":
+                            klarfData.Wafer.TiffFilename = values[0];
                             break;
-                        case "DiePitch":
-                            // Parsing the exponential like 3.963000e+003 to double 
+                        case "DIEPITCH":
                             klarfData.Wafer.DiePitch = new DieSize
                             {
-                                Width = double.Parse(tokens[1], CultureInfo.InvariantCulture),
-                                Height = double.Parse(tokens[2], CultureInfo.InvariantCulture)
+                                Width = double.Parse(values[0], CultureInfo.InvariantCulture),
+                                Height = double.Parse(values[1], CultureInfo.InvariantCulture)
                             };
                             break;
-
-                        // --- 여러 줄에 걸쳐 데이터를 읽어야 하는 특별한 케이스 ---
-                        case "SampleTestPlan":
-                            int dieCount = int.Parse(tokens[1]);
-                            // 다음 줄부터 dieCount 만큼의 줄을 읽어 Die 리스트 
+                        case "SAMPLETESTPLAN":
+                            int dieCount = int.Parse(values[0]);
                             lineIndex = ParseSampleTestPlan(lines, lineIndex + 1, dieCount, klarfData.Dies);
-                            continue; // lineIndex가 이미 업데이트되었으므로 continue
-
-                        case "DefectRecordSpec":
-                            // DefectList의 컬럼 순서를 정의하는 헤더를 파싱.
-                            var defectHeaders = tokens.Skip(2).ToList();
-                            // DefectList를 파싱하기 위해 다음 줄로 넘어감.
+                            continue;
+                        case "DEFECTRECORDSPEC":
+                            var defectHeaders = values.Skip(1).ToList();
                             lineIndex = ParseDefectList(lines, lineIndex + 2, defectHeaders, klarfData.Defects);
-                            continue; // lineIndex가 이미 업데이트되었으므로 continue;
-
-                        case "EndOfFile;":
-                            // 파일의 끝에 도달했으므로 루프를 종료
+                            continue;
+                        case "ENDOFILE;":
+                        case "ENDOFFILE":
                             lineIndex = lines.Length;
                             break;
                         default:
-                            // 처리하지 않는 다른 모든 키워드는 무시하고 넘어감
                             break;
                     }
                 }
                 catch (Exception ex)
                 {
                     var log = $"Error parsing line {lineIndex + 1}: '{lines[lineIndex]}'. Error: {ex.Message}";
-                    // 파싱 중 오류가 발생하면 콘솔에 기록하거나 로그 출력
                     Console.WriteLine(log);
                     MessageBox.Show("Klarf 파싱중 에러가 발생하였습니다.", log);
                 }
@@ -104,11 +106,87 @@ namespace KlarfViewer.Service
                 lineIndex++;
             }
 
-            // 파싱 후처리: 각 Die에 불량 여부(IsDefective)를 마킹
-            LinkDefectsToDies(klarfData);
+                        ValidateParsedData(klarfData);
 
-            return klarfData;
-        }
+                        LinkDefectsToDies(klarfData);
+
+            
+
+                        return klarfData;
+
+                    }
+
+            
+
+                    private void ValidateParsedData(KlarfData klarfData)
+
+                    {
+
+                        var missingFields = new List<string>();
+
+            
+
+                        if (string.IsNullOrEmpty(klarfData.Wafer.WaferID))
+
+                        {
+
+                            missingFields.Add("WaferID");
+
+                        }
+
+                        if (string.IsNullOrEmpty(klarfData.Wafer.LotID))
+
+                        {
+
+                            missingFields.Add("LotID");
+
+                        }
+
+                        if (string.IsNullOrEmpty(klarfData.Wafer.TiffFilename))
+
+                        {
+
+                            missingFields.Add("TiffFilename");
+
+                        }
+
+                        if (klarfData.Wafer.FileTimestamp == DateTime.MinValue)
+
+                        {
+
+                            missingFields.Add("FileTimestamp");
+
+                        }
+
+                        if (klarfData.Dies == null || klarfData.Dies.Count == 0)
+
+                        {
+
+                            missingFields.Add("SampleTestPlan (Die list)");
+
+                        }
+
+                        if (klarfData.Defects == null || klarfData.Defects.Count == 0)
+
+                        {
+
+                            missingFields.Add("Defect list");
+
+                        }
+
+            
+
+                        if (missingFields.Count > 0)
+
+                        {
+
+                            string message = "파싱이 완료되었지만, 일부 필수 데이터가 누락되었습니다:\n\n" + string.Join("\n", missingFields);
+
+                            MessageBox.Show(message, "파싱 경고", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                        }
+
+                    }
 
         private int ParseSampleTestPlan(string[] lines, int startIndex, int count, List<DieInfo> dies)
         {
