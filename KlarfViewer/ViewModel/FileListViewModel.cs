@@ -1,3 +1,4 @@
+using KlarfViewer.Service;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.ObjectModel;
@@ -9,6 +10,7 @@ namespace KlarfViewer.ViewModel
 {
     public class FileListViewModel : BaseViewModel
     {
+        private readonly FileSystemService fileSystemService;
         public event Action<string> FileSelected;
 
         private FileSystemObjectViewModel selectedDirectory;
@@ -46,12 +48,23 @@ namespace KlarfViewer.ViewModel
         public ObservableCollection<FileSystemObjectViewModel> Files { get; }
 
         public ICommand OpenFolderCommand { get; }
+        public ICommand SelectedItemChangedCommand { get; }
 
         public FileListViewModel()
         {
+            fileSystemService = new FileSystemService();
             Directories = new ObservableCollection<FileSystemObjectViewModel>();
             Files = new ObservableCollection<FileSystemObjectViewModel>();
             OpenFolderCommand = new RelayCommand(ExecuteOpenFolder);
+            SelectedItemChangedCommand = new RelayCommand<object>(ExecuteSelectedItemChanged);
+        }
+
+        private void ExecuteSelectedItemChanged(object selectedItem)
+        {
+            if (selectedItem is FileSystemObjectViewModel fso && fso.IsDirectory)
+            {
+                SelectedDirectory = fso;
+            }
         }
 
         private void ExecuteOpenFolder()
@@ -68,43 +81,18 @@ namespace KlarfViewer.ViewModel
                 Directories.Clear();
                 Files.Clear();
                 var rootNode = new FileSystemObjectViewModel(selectedPath, isDirectory: true);
-                LoadSubDirectories(rootNode);
+                fileSystemService.LoadSubDirectories(rootNode);
                 Directories.Add(rootNode);
                 SelectedDirectory = rootNode;
-            }
-        }
-
-        private void LoadSubDirectories(FileSystemObjectViewModel parentNode)
-        {
-            try
-            {
-                foreach (var dirPath in Directory.GetDirectories(parentNode.FullPath))
-                {
-                    var subDirNode = new FileSystemObjectViewModel(dirPath, isDirectory: true);
-                    LoadSubDirectories(subDirNode); 
-                    parentNode.Children.Add(subDirNode);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Ignore folders without access permissions
             }
         }
 
         private void LoadFiles(FileSystemObjectViewModel directoryNode)
         {
             Files.Clear();
-            try
+            foreach (var fileNode in fileSystemService.GetFiles(directoryNode.FullPath))
             {
-                foreach (var filePath in Directory.GetFiles(directoryNode.FullPath))
-                {
-                    var fileNode = new FileSystemObjectViewModel(filePath, isDirectory: false);
-                    Files.Add(fileNode);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Ignore folders without access permissions
+                Files.Add(fileNode);
             }
         }
     }

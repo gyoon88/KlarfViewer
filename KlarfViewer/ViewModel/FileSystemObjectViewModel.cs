@@ -5,10 +5,29 @@ namespace KlarfViewer.ViewModel
 {
     public class FileSystemObjectViewModel : BaseViewModel
     {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
-        public ObservableCollection<FileSystemObjectViewModel> Children { get; set; }
+        private string name;
+        public string Name
+        {
+            get => name;
+            set => SetProperty(ref name, value);
+        }
+
+        private string fullPath;
+        public string FullPath
+        {
+            get => fullPath;
+            set => SetProperty(ref fullPath, value);
+        }
+
+        private ObservableCollection<FileSystemObjectViewModel> children;
+        public ObservableCollection<FileSystemObjectViewModel> Children
+        {
+            get => children;
+            set => SetProperty(ref children, value);
+        }
         public bool IsDirectory { get; }
+
+        public DateTime LastModified { get; set; }
 
         public bool IsFile => !IsDirectory;
 
@@ -28,6 +47,10 @@ namespace KlarfViewer.ViewModel
 
             IsDirectory = isDirectory;
             Children = new ObservableCollection<FileSystemObjectViewModel>();
+            if (!IsDirectory)
+            {
+                LastModified = File.GetLastWriteTime(path);
+            }
         }
 
         public FileSystemObjectViewModel(string path)
@@ -39,6 +62,10 @@ namespace KlarfViewer.ViewModel
 
             IsDirectory = Directory.Exists(path);
             Children = new ObservableCollection<FileSystemObjectViewModel>();
+            if (!IsDirectory)
+            {
+                LastModified = File.GetLastWriteTime(path);
+            }
         }
     }
 }

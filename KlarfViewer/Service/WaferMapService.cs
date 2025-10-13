@@ -7,36 +7,57 @@ namespace KlarfViewer.Service
 {
     public class WaferMapService
     {
-        // Klarf 데이터를 받아 웨이퍼맵 레이아웃 정보를 계산하는 메서드
-        public WaferMapLayout GenerateLayout(KlarfData klarfData)
+        public WaferMapRender CalculateWaferMapRender(KlarfData klarfData, double virtualCanvasSize)
         {
             var dieInfos = klarfData?.Dies;
+            var waferInfo = klarfData?.Wafer;
 
-            // 데이터가 없으면 기본 원형 웨이퍼 데이터를 생성
             if (dieInfos == null || !dieInfos.Any())
             {
+                waferInfo = new WaferInfo { DiePitch = new DieSize { Width = 20, Height = 20 } };
                 dieInfos = CreateDefaultDieInfos();
             }
 
-            int minX = dieInfos.Min(d => d.XIndex);
-            int minY = dieInfos.Min(d => d.YIndex);
-            int maxX = dieInfos.Max(d => d.XIndex);
-            int maxY = dieInfos.Max(d => d.YIndex);
+            int minXIdx = dieInfos.Min(d => d.XIndex);
+            int minYIdx = dieInfos.Min(d => d.YIndex);
+            int maxXIdx = dieInfos.Max(d => d.XIndex);
+            int maxYIdx = dieInfos.Max(d => d.YIndex);
 
-            // Die의 상대적 위치를 (0,0) 부터 시작하도록 조정
-            var normalizedDies = dieInfos.Select(d => new DieInfo
-            {
-                XIndex = d.XIndex - minX,
-                YIndex = d.YIndex - minY,
-                IsDefective = d.IsDefective
-                // 필요한 다른 속성들도 복사
-            }).ToList();
+            double diePitchWidth = (waferInfo?.DiePitch.Width > 0) ? waferInfo.DiePitch.Width : 1.0;
+            double diePitchHeight = (waferInfo?.DiePitch.Height > 0) ? waferInfo.DiePitch.Height : 1.0;
 
-            return new WaferMapLayout
+            int numDiesX = maxXIdx - minXIdx + 1;
+            int numDiesY = maxYIdx - minYIdx + 1;
+
+            double totalWaferWidth = numDiesX * diePitchWidth;
+            double totalWaferHeight = numDiesY * diePitchHeight;
+
+            double scaleX = totalWaferWidth > 0 ? virtualCanvasSize / totalWaferWidth : 0;
+            double scaleY = totalWaferHeight > 0 ? virtualCanvasSize / totalWaferHeight : 0;
+            double scale = Math.Min(scaleX, scaleY);
+
+            double displayDieWidth = diePitchWidth * scale;
+            double displayDieHeight = diePitchHeight * scale;
+
+            var dieRenders = new List<DieRenderInfo>();
+            foreach (var dieInfo in dieInfos)
             {
-                Dies = normalizedDies,
-                Columns = maxX - minX + 1,
-                Rows = maxY - minY + 1
+                dieRenders.Add(new DieRenderInfo
+                {
+                    OriginalDie = dieInfo,
+                    Width = displayDieWidth,
+                    Height = displayDieHeight,
+                    X = (dieInfo.XIndex - minXIdx) * displayDieWidth,
+                    Y = (maxYIdx - dieInfo.YIndex) * displayDieHeight
+                });
+            }
+
+            return new WaferMapRender
+            {
+                DieRenders = dieRenders,
+                WaferMapWidth = numDiesX * displayDieWidth,
+                WaferMapHeight = numDiesY * displayDieHeight,
+                WaferInfo = waferInfo
             };
         }
 

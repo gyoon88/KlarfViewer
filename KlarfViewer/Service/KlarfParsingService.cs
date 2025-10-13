@@ -52,7 +52,6 @@ namespace KlarfViewer.Service
                     var remaining = line.Substring(firstSpace + 1).Trim().TrimEnd(';');
                     values = remaining.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 }
-
                 try
                 {
                     switch (keyword.ToUpper())
@@ -102,91 +101,46 @@ namespace KlarfViewer.Service
                     Console.WriteLine(log);
                     MessageBox.Show("Klarf 파싱중 에러가 발생하였습니다.", log);
                 }
-
                 lineIndex++;
             }
+            ValidateParsedData(klarfData);
+            LinkDefectsToDies(klarfData);
+            return klarfData;
+        }
+        private void ValidateParsedData(KlarfData klarfData)
+        {
+            var missingFields = new List<string>();           
 
-                        ValidateParsedData(klarfData);
-
-                        LinkDefectsToDies(klarfData);
-
-            
-
-                        return klarfData;
-
-                    }
-
-            
-
-                    private void ValidateParsedData(KlarfData klarfData)
-
-                    {
-
-                        var missingFields = new List<string>();
-
-            
-
-                        if (string.IsNullOrEmpty(klarfData.Wafer.WaferID))
-
-                        {
-
-                            missingFields.Add("WaferID");
-
-                        }
-
-                        if (string.IsNullOrEmpty(klarfData.Wafer.LotID))
-
-                        {
-
-                            missingFields.Add("LotID");
-
-                        }
-
-                        if (string.IsNullOrEmpty(klarfData.Wafer.TiffFilename))
-
-                        {
-
-                            missingFields.Add("TiffFilename");
-
-                        }
-
-                        if (klarfData.Wafer.FileTimestamp == DateTime.MinValue)
-
-                        {
-
-                            missingFields.Add("FileTimestamp");
-
-                        }
-
-                        if (klarfData.Dies == null || klarfData.Dies.Count == 0)
-
-                        {
-
-                            missingFields.Add("SampleTestPlan (Die list)");
-
-                        }
-
-                        if (klarfData.Defects == null || klarfData.Defects.Count == 0)
-
-                        {
-
-                            missingFields.Add("Defect list");
-
-                        }
-
-            
-
-                        if (missingFields.Count > 0)
-
-                        {
-
-                            string message = "파싱이 완료되었지만, 일부 필수 데이터가 누락되었습니다:\n\n" + string.Join("\n", missingFields);
-
-                            MessageBox.Show(message, "파싱 경고", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                        }
-
-                    }
+            if (string.IsNullOrEmpty(klarfData.Wafer.WaferID))
+            {
+                missingFields.Add("WaferID");
+            }
+            if (string.IsNullOrEmpty(klarfData.Wafer.LotID))
+            {
+                missingFields.Add("LotID");
+            }
+            if (string.IsNullOrEmpty(klarfData.Wafer.TiffFilename))
+            {
+                missingFields.Add("TiffFilename");
+            }
+            if (klarfData.Wafer.FileTimestamp == DateTime.MinValue)
+            {
+                missingFields.Add("FileTimestamp");
+            }
+            if (klarfData.Dies == null || klarfData.Dies.Count == 0)
+            {
+                missingFields.Add("SampleTestPlan (Die list)");
+            }
+            if (klarfData.Defects == null || klarfData.Defects.Count == 0)
+            {
+                missingFields.Add("Defect list");
+            }
+            if (missingFields.Count > 0)
+            {
+                string message = "파싱이 완료되었지만, 일부 필수 데이터가 누락되었습니다:\n\n" + string.Join("\n", missingFields);
+                MessageBox.Show(message, "파싱 경고", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
 
         private int ParseSampleTestPlan(string[] lines, int startIndex, int count, List<DieInfo> dies)
         {

@@ -10,7 +10,7 @@ namespace KlarfViewer.Model
 
         public int XIndex { get; set; }        // XINDEX (Die의 X 인덱스)
         public int YIndex { get; set; }        // YINDEX (Die의 Y 인덱스)
-        public double XSize { get; set; }      // XSIZE , die size
+        public double XSize { get; set; }      // XSIZE , dieCursor size
         public double YSize { get; set; }      // YSIZE
 
         public double XRel { get; set; }       // XREL (Die 내 상대 X좌표)

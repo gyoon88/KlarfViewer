@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:KlarfViewer"
         xmlns:vm="clr-namespace:KlarfViewer.ViewModel"
         xmlns:model="clr-namespace:KlarfViewer.Model"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:b="clr-namespace:KlarfViewer.Behaviors"
         mc:Ignorable="d"
-        Title="KlarfViewer" Height="800" Width="1200" MinHeight="500" MinWidth="1000">
+        Title="KlarfViewer" Height="800" Width="1200" MinHeight="700" MinWidth="1000">
 
     <Window.InputBindings>
         <KeyBinding Modifiers="Control" Key="S" />
@@ -35,7 +37,10 @@
                 <MenuItem Header="setting" />
             </MenuItem>
             <MenuItem Header="_Tools">
-                <MenuItem Header="Measurement"/>
+                <MenuItem Header="_Measurement" 
+                          IsCheckable="True" 
+                          IsChecked="{Binding DefectImageVM.IsInMeasurementMode, Mode=OneWay}"
+                          Command="{Binding DefectImageVM.ToggleMeasurementModeCommand}"/>
             </MenuItem>
             <MenuItem Header="_UI">
                 <MenuItem Header="Save"/>
@@ -117,9 +122,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </Viewbox>
-
                 </Grid>
-
             </Border>
 
             <!-- Defct Viewer -->
@@ -127,16 +130,34 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Defect Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14" Foreground="White"/>
-
-                    <ScrollViewer  Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <TextBlock Grid.Row="0" Text="Defect Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14" Foreground="White" />
+                    <Grid Margin="5" Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Zoom:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="White"/>
+                        <TextBox Grid.Column="2" Text="{Binding DefectImageVM.ZoomLevel, Mode=TwoWay, StringFormat={}{0:F0}}" VerticalAlignment="Center" Margin="0, 0, 5, 0"/>
+                        <Slider Grid.Column="3" Value="{Binding DefectImageVM.ZoomLevel, Mode=TwoWay}" Minimum="10" Maximum="800" TickFrequency="10" IsSnapToTickEnabled="False" VerticalAlignment="Center"/>
+                        
+                    </Grid>
+                    
+                    <Grid Grid.Row="2" ClipToBounds="True">
                         <Grid>
-                            <Viewbox>
-                                <Image Source="{Binding DefectImageVM.DefectImage}" Stretch="Uniform"/>
-                            </Viewbox>
+                            <i:Interaction.Behaviors>
+                                <b:ImageInteractionBehavior IsInMeasurementMode="{Binding DefectImageVM.IsInMeasurementMode, Mode=OneWay}" 
+                                                          Distance="{Binding DefectImageVM.Distance, Mode=TwoWay}"
+                                                          ZoomLevel="{Binding DefectImageVM.ZoomLevel, Mode=TwoWay}"/>
+                            </i:Interaction.Behaviors>
+
+                            <Image Source="{Binding DefectImageVM.DefectImage}" Stretch="Uniform"/>
+                            <Canvas/>
 
                             <TextBlock Text="{Binding DefectImageVM.ImageLoadingError}" Foreground="Red" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap">
                                 <TextBlock.Style>
@@ -154,7 +175,24 @@
                                 </TextBlock.Style>
                             </TextBlock>
                         </Grid>
-                    </ScrollViewer>
+
+                        <!-- size pixel -->
+                        <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" Foreground="Red" FontSize="14">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DefectImageVM.IsInMeasurementMode}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="Distance: "/>
+                            <Run Text="{Binding DefectImageVM.Distance, StringFormat={}{0:F2}}"/>
+                            <Run Text=" px"/>
+                        </TextBlock>
+                    </Grid>
                 </Grid>
 
             </Border>
@@ -186,23 +224,40 @@
                         </Grid>
                     </Border>
                     <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MinWidth="150"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="2*" MinWidth="200"/>
                         </Grid.ColumnDefinitions>
 
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Folders" Margin="5,0,0,5" Foreground="White"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Files" Margin="5,0,0,5" Foreground="White"/>
+
                         <!-- Directory Tree -->
-                        <TreeView Grid.Column="0"
+                        <TreeView Grid.Row="1" Grid.Column="0"
                                   ItemsSource="{Binding FileListVM.Directories}"
                                   Background="{StaticResource SecondaryBrush}"
                                   Foreground="White"
-                                  Margin="5"
-                                  SelectedItemChanged="FileTreeView_SelectedItemChanged">
+                                  Margin="5">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectedItemChanged">
+                                    <i:InvokeCommandAction Command="{Binding FileListVM.SelectedItemChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=SelectedItem}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </TreeView.ItemContainerStyle>
                             <TreeView.ItemTemplate>
@@ -215,102 +270,128 @@
                         <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="{StaticResource BorderBrushColor}" />
 
                         <!-- File List -->
-                        <ListView Grid.Column="2"
+                        <ListView Grid.Row="1" Grid.Column="2"
                                   ItemsSource="{Binding FileListVM.Files}"
                                   SelectedItem="{Binding FileListVM.SelectedFile, Mode=TwoWay}"
                                   Background="{StaticResource SecondaryBrush}"
                                   Foreground="White"
                                   Margin="5">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Name}" />
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+                                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="250"/>
+                                    <GridViewColumn Header="Date" DisplayMemberBinding="{Binding LastModified, StringFormat='yyyy-MM-dd HH:mm'}" Width="150"/>
+                                </GridView>
+                            </ListView.View>
                         </ListView>
                     </Grid>
-
-
                 </Grid>
             </Border>
 
             <!-- Defect Info Viewer -->
-            <Expander Grid.Row="2" Header="Defect Info Viewer" Grid.Column="2" Foreground="White">
-                <Border >
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+            <Border Grid.Row="2" Grid.Column="2">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Defect Info Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0" FontSize="14"  Foreground="White" />
 
-                        <Grid Grid.Row="0" Margin="5">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
-                                <StackPanel>
-                                    <TextBlock Text="Sample Infomation" FontSize="14"/>
-                                    <TextBlock Margin="2">
-                                        <Run Text="Timestamp: " FontWeight="Bold"/>
-                                        <Run Text="{Binding DefectListVM.Wafer.FileTimestamp}"/>
-                                    </TextBlock>
-                                    <Separator/>
-                                    <TextBlock Margin="2">
-                                        <Run Text="Wafer ID: " FontWeight="Bold"/>
-                                        <Run Text="{Binding DefectListVM.Wafer.WaferID}"/>
-                                    </TextBlock>
-                                    <Separator/>
-                                    <TextBlock Margin="2">
-                                        <Run Text="LotID: " FontWeight="Bold"/>
-                                        <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
-                                    </TextBlock>
-                                    <Separator/>
-                                    <TextBlock Margin="2">
-                                        <Run Text="Device ID: " FontWeight="Bold"/>
-                                        <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
-                                    </TextBlock>                                    
-                                </StackPanel>
-                            </Border>
-                            <GridSplitter Grid.Column="1"/>
-                            <Border Grid.Column="2" Margin="5,0,0,0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
-                                <Grid Margin="4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Button Grid.Row="1" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0}/{1}">
-                                                <Binding Path="DefectListVM.CurrentDefectIndex"/>
-                                                <Binding Path="DefectListVM.TotalDefectCount"/>
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                    <Button Grid.Row="1" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
+                    <Grid Grid.Row="1" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
+                            <StackPanel>
+                                <TextBlock Text="Sample Infomation" FontSize="14" Foreground="White" />
+                                <TextBlock Margin="2" Foreground="White">
+                                    <Run Text="Timestamp: " FontWeight="Bold"/>
+                                    <Run Text="{Binding DefectListVM.Wafer.FileTimestamp}"/>
+                                </TextBlock>
+                                <Separator/>
+                                <TextBlock Margin="2" Foreground="White">
+                                    <Run Text="Wafer ID: " FontWeight="Bold" />
+                                    <Run Text="{Binding DefectListVM.Wafer.WaferID}"/>
+                                </TextBlock>
+                                <Separator/>
+                                <TextBlock Margin="2" Foreground="White">
+                                    <Run Text="LotID: " FontWeight="Bold"/>
+                                    <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
+                                </TextBlock>
+                                <Separator/>
+                                <TextBlock Margin="2" Foreground="White">
+                                    <Run Text="Device ID: " FontWeight="Bold"/>
+                                    <Run Text="{Binding DefectListVM.Wafer.LotID}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <GridSplitter Grid.Column="1"/>
+                        <Border Grid.Column="2" Margin="5,0,0,0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Button Grid.Row="1" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}/{1}">
+                                            <Binding Path="DefectListVM.CurrentDefectIndex"/>
+                                            <Binding Path="DefectListVM.TotalDefectCount"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Row="0" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
+                                <Button Grid.Row="0" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}/{1}">
+                                            <Binding Path="DefectListVM.CurrentDefectIndex"/>
+                                            <Binding Path="DefectListVM.TotalDefectCount"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Row="2" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
+                                <Button Grid.Row="2" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}/{1}">
+                                            <Binding Path="DefectListVM.CurrentDefectIndex"/>
+                                            <Binding Path="DefectListVM.TotalDefectCount"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Row="1" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
 
-                                </Grid>
-                            </Border>
-                        </Grid>
-                        <DataGrid Grid.Row="1" Margin="5,0,5,5" 
-                                  ItemsSource="{Binding DefectListVM.DefectSpec}"
-                                  SelectedItem="{Binding DefectListVM.SelectedDefect, Mode=TwoWay}"
-                                  IsReadOnly="True"
-                                  AutoGenerateColumns="True"
-                                  Background="{StaticResource SecondaryBrush}" 
-                                  BorderBrush="{StaticResource BorderBrushColor}">
-                        </DataGrid>
-
+                            </Grid>
+                        </Border>
                     </Grid>
-                </Border>
-            </Expander>
+                    <DataGrid Grid.Row="2" Margin="5,0,5,5" 
+                                ItemsSource="{Binding DefectListVM.DefectSpec}"
+                                SelectedItem="{Binding DefectListVM.SelectedDefect, Mode=TwoWay}"
+                                IsReadOnly="True"
+                                AutoGenerateColumns="True"
+                                Background="{StaticResource SecondaryBrush}" 
+                                BorderBrush="{StaticResource BorderBrushColor}">
+                    </DataGrid>
+
+                </Grid>
+            </Border>
+
         </Grid>
     </DockPanel>
 </Window>

@@ -4,27 +4,51 @@ namespace KlarfViewer.ViewModel
 {
     public class DieViewModel : BaseViewModel
     {
-        private readonly DieInfo die;
+        private readonly DieInfo dieCursor;
 
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
+        private double x;
+        public double X
+        {
+            get => x;
+            set => SetProperty(ref x, value);
+        }
+
+        private double y;
+        public double Y
+        {
+            get => y;
+            set => SetProperty(ref y, value);
+        }
+
+        private double width;
+        public double Width
+        {
+            get => width;
+            set => SetProperty(ref width, value);
+        }
+
+        private double height;
+        public double Height
+        {
+            get => height;
+            set => SetProperty(ref height, value);
+        }
 
 
         // readonly ?~?
-        public int XIndex => die.XIndex;
-        public int YIndex => die.YIndex;
-        public bool IsDefective => die.IsDefective;
+        public int XIndex => dieCursor.XIndex;
+        public int YIndex => dieCursor.YIndex;
+        
+        public bool IsDefective => dieCursor.IsDefective;
 
         public bool IsSelected
         {
-            get => die.IsSelected;
+            get => dieCursor.IsSelected;
             set
             {
-                if (die.IsSelected != value)
+                if (dieCursor.IsSelected != value)
                 {
-                    die.IsSelected = value;
+                    dieCursor.IsSelected = value;
                     OnPropertyChanged(nameof(IsSelected));
                 }
             }
@@ -32,7 +56,7 @@ namespace KlarfViewer.ViewModel
 
         public DieViewModel(DieInfo die)
         {
-            this.die = die;
+            dieCursor = die;
         }
 
     }

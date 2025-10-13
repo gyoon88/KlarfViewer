@@ -6,6 +6,7 @@ namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
+        // 사용자 선택 뷰를 보여주기 위해 
         private readonly KlarfParsingService klarfParser;
         private KlarfData currentKlarfData;
         private WaferInfo waferInfo;
@@ -14,12 +15,6 @@ namespace KlarfViewer.ViewModel
         public DefectImageViewModel DefectImageVM { get; private set; }
         public FileListViewModel FileListVM { get; private set; }
         public DefectListViewModel DefectListVM { get; private set; }
-
-        public WaferInfo WaferInfomation 
-        { 
-            get => waferInfo;
-            set => SetProperty(ref waferInfo, value);
-        }
 
         public MainViewModel()
         {

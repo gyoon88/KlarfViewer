@@ -42,22 +42,14 @@ namespace KlarfViewer.ViewModel
         public int CurrentDefectIndex
         {
             get => currentDefectIndex;
-            set
-            {
-                currentDefectIndex = value;
-                OnPropertyChanged(nameof(CurrentDefectIndex));
-            }
+            set => SetProperty(ref currentDefectIndex, value);
         }
 
         private int totalDefectCount;
         public int TotalDefectCount
         {
             get => totalDefectCount;
-            set
-            {
-                totalDefectCount = value;
-                OnPropertyChanged(nameof(TotalDefectCount));
-            }
+            set => SetProperty(ref totalDefectCount, value);
         }
 
         public ICommand PreviousDefectCommand { get; }
