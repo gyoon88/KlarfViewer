@@ -10,6 +10,7 @@ namespace KlarfViewer.Model
     {
         // from WaferID
         public string WaferID { get; set; }
+        public string DeviceID { get; set; }
 
         // from LotID
         public string LotID { get; set; }

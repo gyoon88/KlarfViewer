@@ -1,15 +1,14 @@
-﻿using KlarfViewer.Model;
+using KlarfViewer.Model;
 using KlarfViewer.Service;
 using System.ComponentModel;
+using System.Linq;
 
 namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        // 사용자 선택 뷰를 보여주기 위해 
         private readonly KlarfParsingService klarfParser;
-        private KlarfData currentKlarfData;
-        private WaferInfo waferInfo;
+        private KlarfData currentKlarfData; // The single source of truth
 
         public WaferMapViewModel WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
@@ -20,49 +19,51 @@ namespace KlarfViewer.ViewModel
         {
             klarfParser = new KlarfParsingService();
 
+            // Initialize child ViewModels
             WaferMapVM = new WaferMapViewModel();
             DefectImageVM = new DefectImageViewModel();
             FileListVM = new FileListViewModel();
-            waferInfo = new WaferInfo();
-            DefectListVM = new DefectListViewModel(waferInfo);
+            DefectListVM = new DefectListViewModel();
 
-            FileListVM.FileSelected += FileViewerVM_FileSelected;
-            DefectListVM.PropertyChanged += DefectListVM_PropertyChanged;
-            WaferMapVM.DieSelected += WaferMapVM_DieSelected;
+            // Subscribe to events from child VMs to handle synchronization
+            FileListVM.FileSelected += OnFileSelected;
+            DefectListVM.PropertyChanged += OnDefectSelectionChanged;
+            WaferMapVM.DieClicked += OnDieClicked;
         }
 
-        private void FileViewerVM_FileSelected(string filePath)
+        private void OnFileSelected(string filePath)
         {
             currentKlarfData = klarfParser.Parse(filePath);
-            WaferMapVM.UpdateWaferData(currentKlarfData);
-            DefectListVM.UpdateData(currentKlarfData);
+            
+            // Give each child VM a reference to the shared data model
+            WaferMapVM.LoadData(currentKlarfData);
+            DefectListVM.LoadData(currentKlarfData);
         }
 
-        private void WaferMapVM_DieSelected(DieViewModel die)
+        private void OnDefectSelectionChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (die == null) return;
+            if (e.PropertyName != nameof(DefectListViewModel.SelectedDefect)) return;
 
-            // 클릭된 다이와 동일한 인덱스를 가진 첫 번째 결함을 찾음
-            var correspondingDefect = DefectListVM.DefectSpec.FirstOrDefault(d => d.XIndex == die.XIndex && d.YIndex == die.YIndex);
-            if (correspondingDefect != null)
+            var selectedDefect = DefectListVM.SelectedDefect;
+            if (selectedDefect == null) return;
+
+            // Tell WaferMap to highlight the corresponding die
+            WaferMapVM.HighlightDieAt(selectedDefect.XIndex, selectedDefect.YIndex);
+
+            // Tell DefectImage to update the image
+            if (currentKlarfData != null)
             {
-                DefectListVM.SelectedDefect = correspondingDefect;
+                string tiffFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(currentKlarfData.FilePath), currentKlarfData.Wafer.TiffFilename);
+                DefectImageVM.UpdateImage(tiffFilePath, selectedDefect.ImageId);
             }
         }
 
-        private void DefectListVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnDieClicked(DieInfo clickedDie)
         {
-            if (e.PropertyName == nameof(DefectListViewModel.SelectedDefect))
-            {
-                var selectedDefect = DefectListVM.SelectedDefect;
-                if (selectedDefect != null && currentKlarfData != null)
-                {
-                    WaferMapVM.SelectedDefect = selectedDefect;
+            if (clickedDie == null) return;
 
-                    string tiffFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(currentKlarfData.FilePath), currentKlarfData.Wafer.TiffFilename);
-                    DefectImageVM.UpdateImage(tiffFilePath, selectedDefect.ImageId);
-                }
-            }
+            // Tell DefectList to select the corresponding defect
+            DefectListVM.SelectDefectAt(clickedDie.XIndex, clickedDie.YIndex);
         }
     }
 }

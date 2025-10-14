@@ -1,8 +1,10 @@
 using KlarfViewer.Model;
+using System;
+using System.Windows.Input;
 
 namespace KlarfViewer.ViewModel
 {
-    public class DieViewModel : BaseViewModel
+    public class ShowDieViewModel : BaseViewModel
     {
         private readonly DieInfo dieCursor;
 
@@ -34,11 +36,9 @@ namespace KlarfViewer.ViewModel
             set => SetProperty(ref height, value);
         }
 
-
-        // readonly ?~?
         public int XIndex => dieCursor.XIndex;
         public int YIndex => dieCursor.YIndex;
-        
+        public DieInfo OriginalDie => dieCursor;
         public bool IsDefective => dieCursor.IsDefective;
 
         public bool IsSelected
@@ -54,10 +54,14 @@ namespace KlarfViewer.ViewModel
             }
         }
 
-        public DieViewModel(DieInfo die)
+        // Workaround for command binding
+        public Action<DieInfo> DieClickedAction { get; set; }
+        public ICommand ClickCommand { get; }
+
+        public ShowDieViewModel(DieInfo die)
         {
             dieCursor = die;
+            ClickCommand = new RelayCommand(() => DieClickedAction?.Invoke(OriginalDie), () => IsDefective);
         }
-
     }
 }

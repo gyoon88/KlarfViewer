@@ -29,8 +29,10 @@ namespace KlarfViewer.Service
 
             while (lineIndex < lines.Length)
             {
+                // Text 
                 var line = lines[lineIndex].Trim();
 
+                // Continue to next line when it is empty line 
                 if (string.IsNullOrEmpty(line))
                 {
                     lineIndex++;
@@ -40,11 +42,12 @@ namespace KlarfViewer.Service
                 string keyword;
                 string[] values;
 
-                int firstSpace = line.IndexOf(' ');
+                int firstSpace = line.IndexOf(' '); // Retrun -1 when there are no space. Otherwise firstspace > -1 
                 if (firstSpace == -1)
                 {
                     keyword = line.TrimEnd(';');
-                    values = new string[0];
+                    values = Array.Empty<string>(); //  
+                    
                 }
                 else
                 {
@@ -160,7 +163,7 @@ namespace KlarfViewer.Service
                     });
                 }
             }
-            // 읽은 마지막 줄의 인덱스를 반환.
+            // return the index of line 
             return startIndex + count;
         }
 
@@ -190,7 +193,7 @@ namespace KlarfViewer.Service
                 defect.XSize = GetValue<double>(tokens, headerMap, "XSIZE");
                 defect.YSize = GetValue<double>(tokens, headerMap, "YSIZE");
 
-                // ImageId는 DefectID와 동일하다고 가정 (사용자 피드백)
+                // ImageId는 DefectID와 동일하다고 가정
                 defect.ImageId = GetValue<int>(tokens, headerMap, "DEFECTID");
 
                 defects.Add(defect);

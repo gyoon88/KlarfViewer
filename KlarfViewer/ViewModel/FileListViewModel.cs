@@ -19,7 +19,7 @@ namespace KlarfViewer.ViewModel
             get => selectedDirectory;
             set
             {
-                if (SetProperty(ref selectedDirectory, value) && value != null)
+                if (SetProperty(ref selectedDirectory, value) && value != null) // if value change with not null
                 {
                     LoadFiles(value);
                 }
@@ -49,6 +49,7 @@ namespace KlarfViewer.ViewModel
 
         public ICommand OpenFolderCommand { get; }
         public ICommand SelectedItemChangedCommand { get; }
+        public ICommand RefreshCommand { get; }
 
         public FileListViewModel()
         {
@@ -56,6 +57,8 @@ namespace KlarfViewer.ViewModel
             Directories = new ObservableCollection<FileSystemObjectViewModel>();
             Files = new ObservableCollection<FileSystemObjectViewModel>();
             OpenFolderCommand = new RelayCommand(ExecuteOpenFolder);
+            RefreshCommand = new RelayCommand(ExecuteRefresh);
+
             SelectedItemChangedCommand = new RelayCommand<object>(ExecuteSelectedItemChanged);
         }
 
@@ -85,6 +88,13 @@ namespace KlarfViewer.ViewModel
                 Directories.Add(rootNode);
                 SelectedDirectory = rootNode;
             }
+        }
+        private void ExecuteRefresh()
+        {
+
+            Directories.Clear();
+            Files.Clear();
+
         }
 
         private void LoadFiles(FileSystemObjectViewModel directoryNode)

@@ -7,11 +7,8 @@ namespace KlarfViewer.Service
 {
     public class WaferMapService
     {
-        public WaferMapRender CalculateWaferMapRender(KlarfData klarfData, double virtualCanvasSize)
+        public WaferMapRender CalculateWaferMapRender(IEnumerable<DieInfo> dieInfos, WaferInfo waferInfo, double canvasWidth, double canvasHeight)
         {
-            var dieInfos = klarfData?.Dies;
-            var waferInfo = klarfData?.Wafer;
-
             if (dieInfos == null || !dieInfos.Any())
             {
                 waferInfo = new WaferInfo { DiePitch = new DieSize { Width = 20, Height = 20 } };
@@ -32,12 +29,11 @@ namespace KlarfViewer.Service
             double totalWaferWidth = numDiesX * diePitchWidth;
             double totalWaferHeight = numDiesY * diePitchHeight;
 
-            double scaleX = totalWaferWidth > 0 ? virtualCanvasSize / totalWaferWidth : 0;
-            double scaleY = totalWaferHeight > 0 ? virtualCanvasSize / totalWaferHeight : 0;
-            double scale = Math.Min(scaleX, scaleY);
+            double scaleX = totalWaferWidth > 0 ? canvasWidth / totalWaferWidth : 0;
+            double scaleY = totalWaferHeight > 0 ? canvasHeight / totalWaferHeight : 0;
 
-            double displayDieWidth = diePitchWidth * scale;
-            double displayDieHeight = diePitchHeight * scale;
+            double displayDieWidth = diePitchWidth * scaleX;
+            double displayDieHeight = diePitchHeight * scaleY;
 
             var dieRenders = new List<DieRenderInfo>();
             foreach (var dieInfo in dieInfos)
@@ -55,8 +51,8 @@ namespace KlarfViewer.Service
             return new WaferMapRender
             {
                 DieRenders = dieRenders,
-                WaferMapWidth = numDiesX * displayDieWidth,
-                WaferMapHeight = numDiesY * displayDieHeight,
+                WaferMapWidth = canvasWidth,
+                WaferMapHeight = canvasHeight,
                 WaferInfo = waferInfo
             };
         }

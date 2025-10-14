@@ -1,26 +1,16 @@
-﻿using KlarfViewer.Model;
-using System;
+using KlarfViewer.Model;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace KlarfViewer.ViewModel
 {
     public class DefectListViewModel : BaseViewModel
     {
-        public ObservableCollection<DefectInfo> DefectSpec { get; private set; }
+        private KlarfData _klarfData;
 
-        private WaferInfo wafer;
-        public WaferInfo Wafer
-        {
-            get => wafer;
-            set => SetProperty(ref wafer, value);
-        }
-
+        public ObservableCollection<DefectInfo> Defects { get; private set; }
 
         private DefectInfo selectedDefect;
         public DefectInfo SelectedDefect
@@ -28,17 +18,14 @@ namespace KlarfViewer.ViewModel
             get => selectedDefect;
             set
             {
-                if (selectedDefect != value)
+                if (SetProperty(ref selectedDefect, value))
                 {
-                    selectedDefect = value;
-                    OnPropertyChanged(nameof(SelectedDefect));
                     UpdateDefectIndices();
                 }
             }
         }
 
         private int currentDefectIndex;
-              
         public int CurrentDefectIndex
         {
             get => currentDefectIndex;
@@ -52,69 +39,107 @@ namespace KlarfViewer.ViewModel
             set => SetProperty(ref totalDefectCount, value);
         }
 
-        public ICommand PreviousDefectCommand { get; }
-        public ICommand NextDefectCommand { get; }
+        public ICommand PrevGlobalCommand { get; }
+        public ICommand NextGlobalCommand { get; }
+        public ICommand PrevInDieCommand { get; }
+        public ICommand NextInDieCommand { get; }
 
-        public DefectListViewModel(WaferInfo waferInfo, List<DefectInfo> defects = null)
+        public DefectListViewModel()
         {
-            DefectSpec = new ObservableCollection<DefectInfo>(defects ?? new List<DefectInfo>());
-            TotalDefectCount = DefectSpec.Count;
-            CurrentDefectIndex = 0;
+            Defects = new ObservableCollection<DefectInfo>();
 
-            // wafer information update
-            WaferInfo wafer = waferInfo;
-
-            PreviousDefectCommand = new RelayCommand(ExecutePreviousDefect, CanExecutePreviousDefect);
-            NextDefectCommand = new RelayCommand(ExecuteNextDefect, CanExecuteNextDefect);
+            PrevGlobalCommand = new RelayCommand(ExecutePrevGlobal, CanExecutePrevGlobal);
+            NextGlobalCommand = new RelayCommand(ExecuteNextGlobal, CanExecuteNextGlobal);
+            PrevInDieCommand = new RelayCommand(ExecutePrevInDie, CanExecutePrevInDie);
+            NextInDieCommand = new RelayCommand(ExecuteNextInDie, CanExecuteNextInDie);
         }
 
-
-        private bool CanExecuteNextDefect()
+        public void LoadData(KlarfData klarfData)
         {
-            if (SelectedDefect == null || DefectSpec.Count == 0) return false;
-            int currentIndex = DefectSpec.IndexOf(SelectedDefect);
-            return currentIndex < DefectSpec.Count - 1;
-        }
+            _klarfData = klarfData;
+            Defects.Clear();
 
-        private void ExecuteNextDefect()
-        {
-            if (!CanExecuteNextDefect()) return;
-            int currentIndex = DefectSpec.IndexOf(SelectedDefect);
-            SelectedDefect = DefectSpec[currentIndex + 1];
-        }
-
-        private bool CanExecutePreviousDefect()
-        {
-            if (SelectedDefect == null || DefectSpec.Count == 0) return false;
-            int currentIndex = DefectSpec.IndexOf(SelectedDefect);
-            return currentIndex > 0;
-        }
-
-        private void ExecutePreviousDefect()
-        {
-            if (!CanExecutePreviousDefect()) return;
-            int currentIndex = DefectSpec.IndexOf(SelectedDefect);
-            SelectedDefect = DefectSpec[currentIndex - 1];
-        }
-
-                public void UpdateData(KlarfData klarfData)
+            if (_klarfData?.Defects != null)
+            {
+                foreach (var defect in _klarfData.Defects)
                 {
-                    Wafer = klarfData.Wafer;
-                    DefectSpec = new ObservableCollection<DefectInfo>(klarfData.Defects);
-                    TotalDefectCount = DefectSpec.Count;
-                    SelectedDefect = DefectSpec.FirstOrDefault();
-                    OnPropertyChanged(nameof(DefectSpec));
+                    Defects.Add(defect);
                 }
+            }
+            TotalDefectCount = Defects.Count;
+            OnPropertyChanged(nameof(Defects));
+
+            SelectedDefect = Defects.FirstOrDefault();
+        }
+
+        public void SelectDefectAt(int xIndex, int yIndex)
+        {
+            if (Defects == null) return;
+            SelectedDefect = Defects.FirstOrDefault(d => d.XIndex == xIndex && d.YIndex == yIndex) ?? SelectedDefect;
+        }
+
         private void UpdateDefectIndices()
         {
-            if (SelectedDefect != null && DefectSpec.Contains(SelectedDefect))
+            if (SelectedDefect != null && Defects.Contains(SelectedDefect))
             {
-                CurrentDefectIndex = DefectSpec.IndexOf(SelectedDefect) + 1;
+                CurrentDefectIndex = Defects.IndexOf(SelectedDefect) + 1;
             }
             else
             {
                 CurrentDefectIndex = 0;
             }
         }
+
+        #region Command Logic
+
+        // Global Navigation
+        private bool CanExecutePrevGlobal() => Defects.Any() && SelectedDefect != Defects.First();
+        private void ExecutePrevGlobal()
+        {
+            int currentIndex = Defects.IndexOf(SelectedDefect);
+            SelectedDefect = Defects[currentIndex - 1];
+        }
+
+        private bool CanExecuteNextGlobal() => Defects.Any() && SelectedDefect != Defects.Last();
+        private void ExecuteNextGlobal()
+        {
+            int currentIndex = Defects.IndexOf(SelectedDefect);
+            SelectedDefect = Defects[currentIndex + 1];
+        }
+
+        // In-Die Navigation
+        private List<DefectInfo> GetDefectsInCurrentDie()
+        {
+            if (SelectedDefect == null) return new List<DefectInfo>();
+            return Defects.Where(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex).ToList();
+        }
+
+        private bool CanExecutePrevInDie()
+        {
+            if (SelectedDefect == null) return false;
+            var defectsInDie = GetDefectsInCurrentDie();
+            return defectsInDie.IndexOf(SelectedDefect) > 0;
+        }
+        private void ExecutePrevInDie()
+        {
+            var defectsInDie = GetDefectsInCurrentDie();
+            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
+            SelectedDefect = defectsInDie[currentIndexInDie - 1];
+        }
+
+        private bool CanExecuteNextInDie()
+        {
+            if (SelectedDefect == null) return false;
+            var defectsInDie = GetDefectsInCurrentDie();
+            return defectsInDie.IndexOf(SelectedDefect) < defectsInDie.Count - 1;
+        }
+        private void ExecuteNextInDie()
+        {
+            var defectsInDie = GetDefectsInCurrentDie();
+            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
+            SelectedDefect = defectsInDie[currentIndexInDie + 1];
+        }
+
+        #endregion
     }
 }

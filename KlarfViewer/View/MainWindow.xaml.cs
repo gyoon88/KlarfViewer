@@ -10,6 +10,15 @@ namespace KlarfViewer.View
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+            WaferMapContainerGrid.SizeChanged += WaferMapContainerGrid_SizeChanged;
+        }
+
+        private void WaferMapContainerGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (DataContext is MainViewModel mainViewModel && e.NewSize.Width > 0 && e.NewSize.Height > 0)
+            {
+                mainViewModel.WaferMapVM.UpdateMapSize(e.NewSize.Width, e.NewSize.Height);
+            }
         }
     }
 }

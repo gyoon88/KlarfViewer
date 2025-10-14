@@ -24,6 +24,8 @@ namespace KlarfViewer.Service
             }
         }
 
+
+        
         public IEnumerable<FileSystemObjectViewModel> GetFiles(string directoryPath)
         {
             string[] filePaths;
@@ -39,6 +41,8 @@ namespace KlarfViewer.Service
 
             foreach (var filePath in filePaths)
             {
+                //
+                // mermory efiicient!!
                 yield return new FileSystemObjectViewModel(filePath, isDirectory: false);
             }
         }

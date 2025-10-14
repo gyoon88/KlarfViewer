@@ -78,12 +78,13 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Wafer Map Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14"  Foreground="White"/>
 
-                    <Viewbox Grid.Row="1">
+                    <Grid Grid.Row="1" x:Name="WaferMapContainerGrid">
                         <ItemsControl ItemsSource="{Binding WaferMapVM.Dies}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <Canvas Width="{Binding WaferMapVM.WaferMapWidth}" Height="{Binding WaferMapVM.WaferMapHeight}" />
-                                </ItemsPanelTemplate>                            </ItemsControl.ItemsPanel>
+                                    <Canvas />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemContainerStyle>
                                 <Style TargetType="ContentPresenter">
@@ -93,14 +94,11 @@
                             </ItemsControl.ItemContainerStyle>
 
                             <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type vm:DieViewModel}">
-                                <Rectangle Width="{Binding Width}" Height="{Binding Height}" Stroke="Black" StrokeThickness="1">
-                                    <Rectangle.InputBindings>
-                                        <MouseBinding MouseAction="LeftClick" 
-                                                      Command="{Binding DataContext.WaferMapVM.SelectDieCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                      CommandParameter="{Binding}"/>
-                                    </Rectangle.InputBindings>
-                                    <Rectangle.Style>
+                                <DataTemplate DataType="{x:Type vm:ShowDieViewModel}">
+                                                                    <Rectangle Width="{Binding Width}" Height="{Binding Height}" Stroke="Black" StrokeThickness="1">
+                                                                        <Rectangle.InputBindings>
+                                                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
+                                                                        </Rectangle.InputBindings>                                    <Rectangle.Style>
                                         <Style TargetType="Rectangle">
                                             <Setter Property="Fill" Value="Gray"/>
                                             <Setter Property="Cursor" Value="Hand"/>
@@ -120,8 +118,8 @@
                                 </Rectangle>
                             </DataTemplate>
                             </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Viewbox>
+                        </ItemsControl>                
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -218,7 +216,7 @@
 
                             <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.OpenFolderCommand}" />
                             <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
-                            <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
+                            <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.RefreshCommand}"/>
                             <!-- Gage 에는 뭐가 들어갈지 모르겠어서일단 남겨두기 -->
                             <Button Grid.Column="3" Content="Gage" Margin="2" Style="{StaticResource ModernButtonStyle}"/>                             
                         </Grid>
@@ -346,7 +344,9 @@
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <Button Grid.Row="1" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Global Nav" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                                <Button Grid.Row="1" Grid.Column="0" Content="&lt;&lt;" ToolTip="Previous Defect (Global)" Command="{Binding DefectListVM.PrevGlobalCommand}"/>
                                 <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0}/{1}">
@@ -355,38 +355,22 @@
                                         </MultiBinding>
                                     </TextBlock.Text>
                                 </TextBlock>
-                                <Button Grid.Row="0" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
-                                <Button Grid.Row="0" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0}/{1}">
-                                            <Binding Path="DefectListVM.CurrentDefectIndex"/>
-                                            <Binding Path="DefectListVM.TotalDefectCount"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                                <Button Grid.Row="2" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
-                                <Button Grid.Row="2" Grid.Column="0" Content="&lt;" Command="{Binding DefectListVM.PreviousDefectCommand}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0}/{1}">
-                                            <Binding Path="DefectListVM.CurrentDefectIndex"/>
-                                            <Binding Path="DefectListVM.TotalDefectCount"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                                <Button Grid.Row="1" Grid.Column="2" Content="&gt;" Command="{Binding DefectListVM.NextDefectCommand}"/>
+                                <Button Grid.Row="1" Grid.Column="2" Content="&gt;&gt;" ToolTip="Next Defect (Global)" Command="{Binding DefectListVM.NextGlobalCommand}"/>
 
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="In Die Nav" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                                <Button Grid.Row="2" Grid.Column="0" Content="&lt;" ToolTip="Previous Defect in Die" Command="{Binding DefectListVM.PrevInDieCommand}"/>
+                                <Button Grid.Row="2" Grid.Column="2" Content="&gt;" ToolTip="Next Defect in Die" Command="{Binding DefectListVM.NextInDieCommand}"/>
                             </Grid>
                         </Border>
                     </Grid>
                     <DataGrid Grid.Row="2" Margin="5,0,5,5" 
-                                ItemsSource="{Binding DefectListVM.DefectSpec}"
+                                ItemsSource="{Binding DefectListVM.Defects}"
                                 SelectedItem="{Binding DefectListVM.SelectedDefect, Mode=TwoWay}"
                                 IsReadOnly="True"
                                 AutoGenerateColumns="True"
                                 Background="{StaticResource SecondaryBrush}" 
                                 BorderBrush="{StaticResource BorderBrushColor}">
+
                     </DataGrid>
 
                 </Grid>
