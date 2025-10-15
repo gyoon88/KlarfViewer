@@ -1,10 +1,13 @@
 using KlarfViewer.Service;
+using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
+using static System.Net.WebRequestMethods;
+
 
 namespace KlarfViewer.ViewModel
 {
@@ -70,23 +73,56 @@ namespace KlarfViewer.ViewModel
             }
         }
 
+        //private void ExecuteOpenFolder()
+        //{
+        //    var dialog = new VistaFolderBrowserDialog
+        //    {
+        //        Description = "Select a folder.",
+        //        UseDescriptionForTitle = true
+        //    };
+
+        //    if (dialog.ShowDialog() == true)
+        //    {
+        //        string selectedPath = dialog.SelectedPath;
+        //        Directories.Clear();
+        //        Files.Clear();
+        //        var rootNode = new FileSystemObjectViewModel(selectedPath, isDirectory: true);
+        //        fileSystemService.LoadSubDirectories(rootNode);
+        //        Directories.Add(rootNode);
+        //        SelectedDirectory = rootNode;
+        //    }
+        //}
+
         private void ExecuteOpenFolder()
         {
-            var dialog = new VistaFolderBrowserDialog
+            var dialog = new OpenFileDialog
             {
-                Description = "Select a folder.",
-                UseDescriptionForTitle = true
+                Title = "Select Klarf file(s)",
+
+                Filter = "Inspection Files (*.klarf, *.001)|*.klarf;*.001|All files (*.*)|*.*",
+
+                Multiselect = true
             };
 
             if (dialog.ShowDialog() == true)
             {
-                string selectedPath = dialog.SelectedPath;
+                if (dialog.FileNames.Length == 0)
+                {
+                    return;
+                }
+                string selectedPath = System.IO.Path.GetDirectoryName(dialog.FileNames[0]);
+
                 Directories.Clear();
                 Files.Clear();
+
+                // 디렉토리 구조를 로드
                 var rootNode = new FileSystemObjectViewModel(selectedPath, isDirectory: true);
-                fileSystemService.LoadSubDirectories(rootNode);
+                fileSystemService.LoadSubDirectories(rootNode); // 하위 폴더 로드
                 Directories.Add(rootNode);
+
                 SelectedDirectory = rootNode;
+
+
             }
         }
         private void ExecuteRefresh()
