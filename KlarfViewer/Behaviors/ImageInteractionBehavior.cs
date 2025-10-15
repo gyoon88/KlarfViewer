@@ -8,6 +8,7 @@ using System.Windows.Shapes;
 
 namespace KlarfViewer.Behaviors
 {
+    // Interact with View
     public class ImageInteractionBehavior : Behavior<Grid>
     {
         private Image image;

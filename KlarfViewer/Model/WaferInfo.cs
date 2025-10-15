@@ -12,11 +12,13 @@ namespace KlarfViewer.Model
         public string WaferID { get; set; }
         public string DeviceID { get; set; }
 
+        public SampleCenter SampleCenterLocation { get; set; }
+        public int TotalDies { get; set; }
         // from LotID
         public string LotID { get; set; }
 
         // from Slot
-        public int Slot { get; set; }
+        public string Slot { get; set; }
 
         // from DiePitch 
         public DieSize DiePitch { get; set; }
@@ -33,5 +35,10 @@ namespace KlarfViewer.Model
     {
         public double Width { get; set; }
         public double Height { get; set; }
+    }
+    public struct SampleCenter
+    {
+        public double XLoc { get; set; }
+        public double YLoc { get; set; }
     }
 }

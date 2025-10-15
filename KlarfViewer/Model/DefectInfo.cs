@@ -15,18 +15,20 @@ namespace KlarfViewer.Model
 
         public double XRel { get; set; }       // XREL (Die 내 상대 X좌표)
         public double YRel { get; set; }       // YREL (Die 내 상대 Y좌표)
-        public int DefectArea { get; set; }    // DEFECTAREA um^2
+        public double DefectArea { get; set; }    // DEFECTAREA um^2
 
         public int DSize { get; set; }         // DSIZE diameter
-        public int Test {  get; set; }         // TEST step 
-        public int ClassNumber { get; set; }   // CLASSNUMBER Type of Defect 
-        public int ClusterNumber { get; set; } // Clusternumber Clustered number of wafer
+        //public int Test {  get; set; }         // TEST step 
+        //public int ClassNumber { get; set; }   // CLASSNUMBER Type of Defect 
+        //public int ClusterNumber { get; set; } // Clusternumber Clustered number of wafer
 
 
         public int ImageCount { get; set; }    // IMAGECOUNT
+        public int ImageList { get; set; }
         public int ImageId { get; set; }       // IMAGELIST의 첫 번째 값 (대표 이미지 ID)
 
-
+        public int DefectIdInDie { get; set; }
+        public int TotalDefectsInDie { get; set; }
 
 
         //public int RoughBinNumber {  get; set; } // ROUGH BIN NUMBER

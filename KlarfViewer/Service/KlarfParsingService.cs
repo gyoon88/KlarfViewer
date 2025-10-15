@@ -23,7 +23,7 @@ namespace KlarfViewer.Service
                 throw new FileNotFoundException("Klarf 파일을 찾을 수 없습니다.", filePath);
             }
 
-            KlarfData klarfData = new KlarfData { FilePath = filePath };
+            KlarfData CurrentklarfData = new KlarfData { FilePath = filePath };
             var lines = File.ReadAllLines(filePath);
             int lineIndex = 0;
 
@@ -60,23 +60,35 @@ namespace KlarfViewer.Service
                     switch (keyword.ToUpper())
                     {
                         case "WAFERID":
-                            klarfData.Wafer.WaferID = values[0].Trim('"');
+                            CurrentklarfData.Wafer.WaferID = values[0].Trim('"');
                             break;
                         case "LOTID":
-                            klarfData.Wafer.LotID = values[0].Trim('"');
+                            CurrentklarfData.Wafer.LotID = values[0].Trim('"');
                             break;
                         case "SLOT":
-                            klarfData.Wafer.Slot = int.Parse(values[0]);
+                            CurrentklarfData.Wafer.Slot = values[0].Trim('"');
+                            break;
+                        case "INSPECTIONSTATIONID":
+                            CurrentklarfData.Wafer.DeviceID = string.Join(" - ", values.Select(
+                                value => value.Trim('"')).Where(
+                                trimmedValue => !string.IsNullOrWhiteSpace(trimmedValue))); // 2. 따옴표 제거 후 비어있거나 공백만 남은 항목은 제외합니다.
                             break;
                         case "FILETIMESTAMP":
                             string timestamp = values[0] + " " + values[1];
-                            klarfData.Wafer.FileTimestamp = DateTime.ParseExact(timestamp, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                            CurrentklarfData.Wafer.FileTimestamp = DateTime.ParseExact(timestamp, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                            break;
+                        case "SAMPLECENTERLOCATION":
+                            CurrentklarfData.Wafer.SampleCenterLocation = new SampleCenter
+                            {
+                                XLoc = double.Parse(values[0], CultureInfo.InvariantCulture),
+                                YLoc = double.Parse(values[1], CultureInfo.InvariantCulture)
+                            };
                             break;
                         case "TIFFFILENAME":
-                            klarfData.Wafer.TiffFilename = values[0];
+                            CurrentklarfData.Wafer.TiffFilename = values[0];
                             break;
                         case "DIEPITCH":
-                            klarfData.Wafer.DiePitch = new DieSize
+                            CurrentklarfData.Wafer.DiePitch = new DieSize
                             {
                                 Width = double.Parse(values[0], CultureInfo.InvariantCulture),
                                 Height = double.Parse(values[1], CultureInfo.InvariantCulture)
@@ -84,11 +96,12 @@ namespace KlarfViewer.Service
                             break;
                         case "SAMPLETESTPLAN":
                             int dieCount = int.Parse(values[0]);
-                            lineIndex = ParseSampleTestPlan(lines, lineIndex + 1, dieCount, klarfData.Dies);
+                            CurrentklarfData.Wafer.TotalDies = int.Parse(values[0]);
+                            lineIndex = ParseSampleTestPlan(lines, lineIndex + 1, dieCount, CurrentklarfData.Dies);
                             continue;
                         case "DEFECTRECORDSPEC":
                             var defectHeaders = values.Skip(1).ToList();
-                            lineIndex = ParseDefectList(lines, lineIndex + 2, defectHeaders, klarfData.Defects);
+                            lineIndex = ParseDefectList(lines, lineIndex + 2, defectHeaders, CurrentklarfData.Defects);
                             continue;
                         case "ENDOFILE;":
                         case "ENDOFFILE":
@@ -106,9 +119,9 @@ namespace KlarfViewer.Service
                 }
                 lineIndex++;
             }
-            ValidateParsedData(klarfData);
-            LinkDefectsToDies(klarfData);
-            return klarfData;
+            ValidateParsedData(CurrentklarfData);
+            LinkDefectsToDies(CurrentklarfData);
+            return CurrentklarfData;
         }
         private void ValidateParsedData(KlarfData klarfData)
         {
@@ -167,6 +180,7 @@ namespace KlarfViewer.Service
             return startIndex + count;
         }
 
+        // Call from parse when the keyword is DefectList 
         private int ParseDefectList(string[] lines, int startIndex, List<string> headers, List<DefectInfo> defects)
         {
             int currentIndex = startIndex;
@@ -192,9 +206,11 @@ namespace KlarfViewer.Service
                 defect.YIndex = GetValue<int>(tokens, headerMap, "YINDEX");
                 defect.XSize = GetValue<double>(tokens, headerMap, "XSIZE");
                 defect.YSize = GetValue<double>(tokens, headerMap, "YSIZE");
-
-                // ImageId는 DefectID와 동일하다고 가정
-                defect.ImageId = GetValue<int>(tokens, headerMap, "DEFECTID");
+                defect.DefectArea = GetValue<double>(tokens, headerMap, "DEFECTAREA");
+                defect.DSize = GetValue<int>(tokens, headerMap, "DSIZE");
+                defect.ImageCount = GetValue<int>(tokens, headerMap, "IMAGECOUNT");
+                defect.ImageList = GetValue<int>(tokens, headerMap, "IMAGELIST");
+                defect.ImageId = GetValue<int>(tokens, headerMap, "IMAGEID");
 
                 defects.Add(defect);
                 currentIndex++;
@@ -228,7 +244,18 @@ namespace KlarfViewer.Service
                 var key = $"{defect.XIndex}_{defect.YIndex}";
                 if (dieMap.TryGetValue(key, out DieInfo die))
                 {
+                    die.DefectCount++;
                     die.IsDefective = true;
+                    defect.DefectIdInDie = die.DefectCount;
+                }
+            }
+            foreach (var defect in data.Defects)
+            {
+                var key = $"{defect.XIndex}_{defect.YIndex}";
+                if (dieMap.TryGetValue(key, out DieInfo die))
+                {
+                    // 최종 Defect 개수를 할당
+                    defect.TotalDefectsInDie = die.DefectCount;
                 }
             }
         }

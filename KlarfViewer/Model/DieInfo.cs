@@ -13,11 +13,14 @@ namespace KlarfViewer.Model
         public bool IsDefective { get; set; }
 
         public bool IsSelected { get; set; }
-
+        
+        public int DefectCount { get; set; }
         public DieInfo()
         {
+            
             IsDefective = false;
-            IsSelected = false;            
+            IsSelected = false;
+            DefectCount = 0;
         }
     }
 }
