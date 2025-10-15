@@ -55,6 +55,7 @@ namespace KlarfViewer.ViewModel
         }
 
         // Workaround for command binding
+        // wafermapviewer에서 확인하는 ...
         public Action<DieInfo> DieClickedAction { get; set; }
         public ICommand ClickCommand { get; }
 
