@@ -93,7 +93,7 @@ namespace KlarfViewer.ViewModel
         {
 
             Directories.Clear();
-            Files.Clear();
+            Files.Clear();           
 
         }
 

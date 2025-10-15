@@ -12,8 +12,8 @@ namespace KlarfViewer.ViewModel
 
         // Shared data model (by reference)
         private KlarfData _klarfData;
-        private double _currentWidth;
-        private double _currentHeight;
+        private double currentWidth;
+        private double currentHeight;
 
         public ObservableCollection<ShowDieViewModel> Dies { get; private set; }
         public Action<DieInfo> DieClicked { get; set; }
@@ -24,22 +24,22 @@ namespace KlarfViewer.ViewModel
             _waferMapService = new WaferMapService();
         }
 
-        // 1. Load data reference once
+        // Load data reference from MainViewModel that give Model data
         public void LoadData(KlarfData klarfData)
         {
             _klarfData = klarfData;
             Render();
         }
 
-        // 2. Update size and re-render using stored data
+        // Update size and re-render using stored data
         public void UpdateMapSize(double newWidth, double newHeight)
         {
-            _currentWidth = newWidth;
-            _currentHeight = newHeight;
+            currentWidth = newWidth;
+            currentHeight = newHeight;
             Render();
         }
 
-        // 3. Highlight a die based on index from MainViewModel
+        // Highlight a die based on index from MainViewModel
         public void HighlightDieAt(int xIndex, int yIndex)
         {
             if (Dies == null) return;
@@ -52,13 +52,13 @@ namespace KlarfViewer.ViewModel
         private void Render()
         {
             Dies.Clear();
-            if (_klarfData == null || _currentWidth <= 0 || _currentHeight <= 0)
+            if (_klarfData == null || currentWidth <= 0 || currentHeight <= 0)
             {
                 OnPropertyChanged(nameof(Dies));
                 return;
             }
 
-            var dieViewModels = _waferMapService.CalculateDieViewModels(_klarfData.Dies, _klarfData.Wafer, _currentWidth, _currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
+            var dieViewModels = _waferMapService.CalculateDieViewModels(_klarfData.Dies, _klarfData.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
 
             foreach (var dieVM in dieViewModels)
             {

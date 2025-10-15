@@ -134,6 +134,7 @@ namespace KlarfViewer.Behaviors
             }
         }
 
+        // 이미지 확대 축소 
         private void OnMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (image == null) return;
@@ -149,13 +150,13 @@ namespace KlarfViewer.Behaviors
             double newScale = currentScale * zoomFactor;
             ZoomLevel = newScale * 100.0;
 
-            // The actual transform update will be handled by the OnZoomLevelChanged callback
-            // But we need to adjust the translation based on the mouse position
             double newX = mousePos.X - (mousePos.X - translateTransform.X) * zoomFactor;
             double newY = mousePos.Y - (mousePos.Y - translateTransform.Y) * zoomFactor;
+            // cusor 업데이트
             ConstrainTranslation(newX, newY);
         }
 
+        // 이미지 Shifting
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (image == null) return;
@@ -189,6 +190,7 @@ namespace KlarfViewer.Behaviors
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
+            // 측정 모드이거나 shift 를 누른 상태일때 
             if (measurementStartPoint.HasValue && (IsInMeasurementMode || Keyboard.Modifiers == ModifierKeys.Shift))
             {
                 var currentPos = e.GetPosition(canvas);

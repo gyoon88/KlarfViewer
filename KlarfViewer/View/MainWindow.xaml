@@ -95,10 +95,11 @@
 
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type vm:ShowDieViewModel}">
-                                                                    <Rectangle Width="{Binding Width}" Height="{Binding Height}" Stroke="Black" StrokeThickness="1">
-                                                                        <Rectangle.InputBindings>
-                                                                            <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
-                                                                        </Rectangle.InputBindings>                                    <Rectangle.Style>
+                                <Rectangle Width="{Binding Width}" Height="{Binding Height}" Stroke="Black" StrokeThickness="1">
+                                    <Rectangle.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding ClickCommand}"/>
+                                    </Rectangle.InputBindings>                                    
+                                    <Rectangle.Style>
                                         <Style TargetType="Rectangle">
                                             <Setter Property="Fill" Value="Gray"/>
                                             <Setter Property="Cursor" Value="Hand"/>
