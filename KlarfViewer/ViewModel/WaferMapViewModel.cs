@@ -58,23 +58,13 @@ namespace KlarfViewer.ViewModel
                 return;
             }
 
-            var renderData = _waferMapService.CalculateWaferMapRender(_klarfData.Dies, _klarfData.Wafer, _currentWidth, _currentHeight);
-            
-            if (renderData.DieRenders != null)
-            { 
-                foreach (var dieRenderInfo in renderData.DieRenders)
-                {
-                    var dieVM = new ShowDieViewModel(dieRenderInfo.OriginalDie)
-                    {
-                        Width = dieRenderInfo.Width,
-                        Height = dieRenderInfo.Height,
-                        X = dieRenderInfo.X,
-                        Y = dieRenderInfo.Y
-                    };
-                    dieVM.DieClickedAction = (dieInfo) => DieClicked?.Invoke(dieInfo);
-                    Dies.Add(dieVM);
-                }
+            var dieViewModels = _waferMapService.CalculateDieViewModels(_klarfData.Dies, _klarfData.Wafer, _currentWidth, _currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
+
+            foreach (var dieVM in dieViewModels)
+            {
+                Dies.Add(dieVM);
             }
+
             OnPropertyChanged(nameof(Dies));
         }
     }

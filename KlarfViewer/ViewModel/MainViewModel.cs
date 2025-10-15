@@ -54,7 +54,7 @@ namespace KlarfViewer.ViewModel
             if (currentKlarfData != null)
             {
                 string tiffFilePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(currentKlarfData.FilePath), currentKlarfData.Wafer.TiffFilename);
-                DefectImageVM.UpdateImage(tiffFilePath, selectedDefect.ImageId);
+                DefectImageVM.UpdateImage(tiffFilePath, selectedDefect.Id);
             }
         }
 

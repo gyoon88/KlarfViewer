@@ -369,9 +369,19 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="Global Nav" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                                <!-- Total Die Navigator-->
+                                <Button Grid.Row="0" Grid.Column="0" Content="&lt;" ToolTip="Previous Defect in Die" Command="{Binding DefectListVM.PrevInDieCommand}"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0}/{1}">
+                                            <Binding Path="DefectListVM.CurrentDefectIndexInDie"/>
+                                            <Binding Path="DefectListVM.TotalDefectCountInDie"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <Button Grid.Row="0" Grid.Column="2" Content="&gt;" ToolTip="Next Defect in Die" Command="{Binding DefectListVM.NextInDieCommand}"/>
+                                <!-- Local Defect Die Navigator-->
                                 <Button Grid.Row="1" Grid.Column="0" Content="&lt;" ToolTip="Previous Defect in Die" Command="{Binding DefectListVM.PrevInDieCommand}"/>
-
                                 <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0}/{1}">
@@ -381,10 +391,7 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                                 <Button Grid.Row="1" Grid.Column="2" Content="&gt;" ToolTip="Next Defect in Die" Command="{Binding DefectListVM.NextInDieCommand}"/>
-
-
-
-
+                                <!-- Global Defect Die Navigator-->
                                 <Button Grid.Row="2" Grid.Column="0" Content="&lt;&lt;" ToolTip="Previous Defect (Global)" Command="{Binding DefectListVM.PrevGlobalCommand}"/>
                                 <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontSize="16">
                                     <TextBlock.Text>

@@ -1,4 +1,5 @@
 ﻿using KlarfViewer.Model;
+using KlarfViewer.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,70 +8,40 @@ namespace KlarfViewer.Service
 {
     public class WaferMapService
     {
-        public WaferMapRender CalculateWaferMapRender(IEnumerable<DieInfo> dieInfos, WaferInfo waferInfo, double canvasWidth, double canvasHeight)
+        public List<ShowDieViewModel> CalculateDieViewModels(IEnumerable<DieInfo> dieInfos, WaferInfo waferInfo, double canvasWidth, double canvasHeight, Action<DieInfo> dieClickAction)
         {
-            if (dieInfos == null || !dieInfos.Any())
+            if (dieInfos == null || !dieInfos.Any() || waferInfo == null)
             {
-                waferInfo = new WaferInfo { DiePitch = new DieSize { Width = 20, Height = 20 } };
-                dieInfos = CreateDefaultDieInfos();
+                return new List<ShowDieViewModel>(); // Return empty list
             }
 
+            // Calculate Wafer range
             int minXIdx = dieInfos.Min(d => d.XIndex);
             int minYIdx = dieInfos.Min(d => d.YIndex);
             int maxXIdx = dieInfos.Max(d => d.XIndex);
             int maxYIdx = dieInfos.Max(d => d.YIndex);
 
-            double diePitchWidth = (waferInfo?.DiePitch.Width > 0) ? waferInfo.DiePitch.Width : 1.0;
-            double diePitchHeight = (waferInfo?.DiePitch.Height > 0) ? waferInfo.DiePitch.Height : 1.0;
-
             int numDiesX = maxXIdx - minXIdx + 1;
             int numDiesY = maxYIdx - minYIdx + 1;
 
-            double totalWaferWidth = numDiesX * diePitchWidth;
-            double totalWaferHeight = numDiesY * diePitchHeight;
+            double displayDieWidth = (numDiesX > 0) ? canvasWidth / numDiesX : 0;
+            double displayDieHeight = (numDiesY > 0) ? canvasHeight / numDiesY : 0;
 
-            double scaleX = totalWaferWidth > 0 ? canvasWidth / totalWaferWidth : 0;
-            double scaleY = totalWaferHeight > 0 ? canvasHeight / totalWaferHeight : 0;
-
-            double displayDieWidth = diePitchWidth * scaleX;
-            double displayDieHeight = diePitchHeight * scaleY;
-
-            var dieRenders = new List<DieRenderInfo>();
+            var dieViewModels = new List<ShowDieViewModel>();
             foreach (var dieInfo in dieInfos)
             {
-                dieRenders.Add(new DieRenderInfo
+                var dieVM = new ShowDieViewModel(dieInfo)
                 {
-                    OriginalDie = dieInfo,
                     Width = displayDieWidth,
                     Height = displayDieHeight,
                     X = (dieInfo.XIndex - minXIdx) * displayDieWidth,
-                    Y = (maxYIdx - dieInfo.YIndex) * displayDieHeight
-                });
+                    Y = (maxYIdx - dieInfo.YIndex) * displayDieHeight,
+                    DieClickedAction = dieClickAction
+                };
+                dieViewModels.Add(dieVM);
             }
 
-            return new WaferMapRender
-            {
-                DieRenders = dieRenders,
-                WaferMapWidth = canvasWidth,
-                WaferMapHeight = canvasHeight,
-                WaferInfo = waferInfo
-            };
-        }
-
-        private List<DieInfo> CreateDefaultDieInfos()
-        {
-            var defaultDies = new List<DieInfo>();
-            for (int y = -15; y <= 15; y++)
-            {
-                for (int x = -15; x <= 15; x++)
-                {
-                    if (x * x + y * y < 15 * 15) // 원형 필터
-                    {
-                        defaultDies.Add(new DieInfo { XIndex = x, YIndex = y });
-                    }
-                }
-            }
-            return defaultDies;
+            return dieViewModels;
         }
     }
 }

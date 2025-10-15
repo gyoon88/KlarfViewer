@@ -76,7 +76,7 @@ namespace KlarfViewer.ViewModel
                     BitmapCacheOption.OnLoad
                 );
 
-                int frameIndex = imageId;
+                int frameIndex = imageId-1;
                 if (frameIndex >= 0 && frameIndex < decoder.Frames.Count)
                 {
                     DefectImage = decoder.Frames[frameIndex];

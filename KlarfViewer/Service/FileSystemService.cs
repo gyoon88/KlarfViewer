@@ -7,6 +7,10 @@ namespace KlarfViewer.Service
 {
     public class FileSystemService
     {
+        /// <summary>
+        /// 재귀 방식으로 디렉토리 탐색
+        /// </summary>
+        /// <param name="parentNode"></param>
         public void LoadSubDirectories(FileSystemObjectViewModel parentNode)
         {
             try
@@ -24,7 +28,11 @@ namespace KlarfViewer.Service
             }
         }
 
-
+        /// <summary>
+        ///  선택된 디렉토리 내부의 
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <returns></returns>
         
         public IEnumerable<FileSystemObjectViewModel> GetFiles(string directoryPath)
         {
