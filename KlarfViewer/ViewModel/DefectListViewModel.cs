@@ -30,6 +30,8 @@ namespace KlarfViewer.ViewModel
             }
         }
 
+
+        // DefectID in Defects 
         private int currentDefectIndex;
         public int CurrentDefectIndex
         {
@@ -43,7 +45,9 @@ namespace KlarfViewer.ViewModel
             get => totalDefectCount;
             set => SetProperty(ref totalDefectCount, value);
         }
+        
 
+        // Inner Defect of Die
         private int currentDefectIndexInDie;
         public int CurrentDefectIndexInDie
         {
@@ -58,12 +62,34 @@ namespace KlarfViewer.ViewModel
             set => SetProperty(ref totalDefectCountInDie, value);
         }
 
+        // Total Die  
+
+        private int currentDieIndex;
+        public int CurrentDieIndex
+        {
+            get => currentDieIndex;
+            set => SetProperty(ref currentDieIndex, value);
+        }
+
+        private int totalDieCount;
+        public int TotalDieCount
+        {
+            get => totalDieCount;
+            set => SetProperty(ref totalDieCount, value);
+        }
+
+
 
         public ICommand PrevGlobalCommand { get; }
         public ICommand NextGlobalCommand { get; }
         public ICommand PrevInDieCommand { get; }
         public ICommand NextInDieCommand { get; }
 
+        public ICommand PrevGlobalDieCommand { get; }
+        public ICommand NextGlobalDieCommand { get; }
+
+
+        // Constructor
         public DefectListViewModel()
         {
             Defects = new ObservableCollection<DefectInfo>();
@@ -71,6 +97,9 @@ namespace KlarfViewer.ViewModel
             NextGlobalCommand = new RelayCommand(ExecuteNextGlobal, CanExecuteNextGlobal);
             PrevInDieCommand = new RelayCommand(ExecutePrevInDie, CanExecutePrevInDie);
             NextInDieCommand = new RelayCommand(ExecuteNextInDie, CanExecuteNextInDie);
+
+            PrevGlobalDieCommand = new RelayCommand(ExecutePrevGlobalDie, CanExecutePrevGlobalDie);
+            NextGlobalDieCommand = new RelayCommand(ExecuteNextGlobalDie, CanExecuteNextGlobalDie);
         }
 
 
@@ -83,22 +112,27 @@ namespace KlarfViewer.ViewModel
 
             if (klarfInfomation?.Defects != null)
             {
+                // Create Defect ObserveCollection 
                 foreach (var defect in klarfInfomation.Defects)
                 {
                     Defects.Add(defect);
                 }
             }
             TotalDefectCount = Defects.Count;
+            TotalDieCount = klarfInfomation.Wafer.TotalDies;
             OnPropertyChanged(nameof(Defects));
 
-            // set default useing by LINQ 
+            // set default using LINQ 
             SelectedDefect = Defects.FirstOrDefault();
         }
 
+        // wafer Map viewer Evant 
         public void SelectDefectAt(int xIndex, int yIndex)
         {
             if (Defects == null) return;
             SelectedDefect = Defects.FirstOrDefault(d => d.XIndex == xIndex && d.YIndex == yIndex) ?? SelectedDefect;
+            return;           
+
         }
 
         private void UpdateDefectIndices()
@@ -106,12 +140,6 @@ namespace KlarfViewer.ViewModel
             if (SelectedDefect != null && Defects.Contains(SelectedDefect))
             {
                 CurrentDefectIndex = Defects.IndexOf(SelectedDefect) + 1;
-
-                //// Local Index
-                //var defectsInDie = GetDefectsInCurrentDie();
-                //CurrentDefectIndexInDie = defectsInDie.IndexOf(SelectedDefect) + 1;
-                //TotalDefectCountInDie = defectsInDie.Count();
-
                 CurrentDefectIndexInDie = SelectedDefect.DefectIdInDie;
                 TotalDefectCountInDie = SelectedDefect.TotalDefectsInDie;
             }
@@ -120,10 +148,6 @@ namespace KlarfViewer.ViewModel
                 CurrentDefectIndex = 0;
             }
         }
-
-
-
-
 
         // In-Die Navigation
         private List<DefectInfo> GetDefectsInCurrentDie()
@@ -159,6 +183,19 @@ namespace KlarfViewer.ViewModel
             int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
             SelectedDefect = defectsInDie[currentIndexInDie + 1];
         }
+        // Inner Die Defect Navigation
+        private void ExecutePrevGlobalDie()
+        {                        
+            var defectsInDie = GetDefectsInCurrentDie();
+            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
+            SelectedDefect = defectsInDie[currentIndexInDie - 1];
+        }
+        private void ExecuteNextGlobalDie()
+        {
+            var defectsInDie = GetDefectsInCurrentDie();
+            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
+            SelectedDefect = defectsInDie[currentIndexInDie + 1];
+        }
 
         // Condition of Execute - Global Defect 
         private bool CanExecuteNextGlobal() => Defects.Any() && SelectedDefect != Defects.Last();
@@ -178,5 +215,16 @@ namespace KlarfViewer.ViewModel
             return defectsInDie.IndexOf(SelectedDefect) < defectsInDie.Count - 1;
         }
 
+        // Condition of Execute - Global Die 
+        private bool CanExecuteNextGlobalDie()
+        {
+            var die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex);
+            return KlarfInfomation.Wafer.TotalDies > die.DieID;
+        }
+        private bool CanExecutePrevGlobalDie()
+        {
+            var die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex);   
+            return die.DieID > 0;
+        }
     }
 }

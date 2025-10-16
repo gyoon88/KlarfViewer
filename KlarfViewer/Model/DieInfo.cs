@@ -6,6 +6,7 @@ namespace KlarfViewer.Model
     public class DieInfo
     {
 
+        public int DieID { get; set; }
         public int XIndex { get; set; }
 
         public int YIndex { get; set; }
@@ -14,6 +15,8 @@ namespace KlarfViewer.Model
 
         public bool IsSelected { get; set; }
         
+      
+
         public int DefectCount { get; set; }
         public DieInfo()
         {

@@ -172,7 +172,8 @@ namespace KlarfViewer.Service
                     dies.Add(new DieInfo
                     {
                         XIndex = int.Parse(tokens[0]),
-                        YIndex = int.Parse(tokens[1])
+                        YIndex = int.Parse(tokens[1]),
+                        DieID = i + 1
                     });
                 }
             }
