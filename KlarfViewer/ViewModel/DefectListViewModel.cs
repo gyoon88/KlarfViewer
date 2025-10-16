@@ -137,8 +137,7 @@ namespace KlarfViewer.ViewModel
                 CurrentDefectIndexInDie = SelectedDefect.DefectIdInDie;
                 DieInfo die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
                 CurrentDieIndex = die.DieID;
-                TotalDefectCountInDie = SelectedDefect.TotalDefectsInDie;
-                
+                TotalDefectCountInDie = SelectedDefect.TotalDefectsInDie;                
             }
             else
             {
@@ -191,7 +190,7 @@ namespace KlarfViewer.ViewModel
         private void ExecutePrevGlobalDie()
         {
             var currentDie = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
-            if (currentDie == null) return; // 현재 Die를 못 찾으면 중단
+            if (currentDie == null) return; // stop If there not exist 
 
             int currentDieID = currentDie.DieID;
 

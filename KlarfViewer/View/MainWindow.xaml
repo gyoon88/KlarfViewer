@@ -335,7 +335,7 @@
                         <Border Grid.Column="0" BorderThickness="1" BorderBrush="{StaticResource BorderBrushColor}">
                             <StackPanel>
                                 <TextBlock Text="Sample Infomation" FontSize="14" Foreground="White" />
-                                <Separator/>
+                                <Separator Margin="3"/>
                                 <TextBlock Margin="2" Foreground="White">
                                     <Run Text="Timestamp: " FontWeight="Bold"/>
                                     <Run Text="{Binding DefectListVM.KlarfInfomation.Wafer.FileTimestamp}"/>
