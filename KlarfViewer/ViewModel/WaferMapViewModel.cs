@@ -8,7 +8,7 @@ namespace KlarfViewer.ViewModel
 {
     public class WaferMapViewModel : BaseViewModel
     {
-        private readonly WaferMapService _waferMapService;
+        private readonly WaferMapService waferMapService;
 
         // Shared data model (by reference)
         private KlarfData klarfInfomation;
@@ -21,7 +21,7 @@ namespace KlarfViewer.ViewModel
         public WaferMapViewModel()
         {
             Dies = new ObservableCollection<ShowDieViewModel>();
-            _waferMapService = new WaferMapService();
+            waferMapService = new WaferMapService();
         }
 
         // Load data reference from MainViewModel that give Model data
@@ -58,7 +58,7 @@ namespace KlarfViewer.ViewModel
                 return;
             }
 
-            var dieViewModels = _waferMapService.CalculateDieViewModels(klarfInfomation.Dies, klarfInfomation.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
+            var dieViewModels = waferMapService.CalculateDieViewModels(klarfInfomation.Dies, klarfInfomation.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
 
             foreach (var dieVM in dieViewModels)
             {

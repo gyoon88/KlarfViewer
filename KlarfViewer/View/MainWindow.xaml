@@ -23,7 +23,7 @@
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Folder Open" Command="{Binding FileListVM.OpenFolderCommand}"/>
+                <MenuItem Header="Folder Open" Command="{Binding FileListVM.Commands.OpenFolderCommand}"/>
                 <MenuItem Header="Image Save" />
                 <Separator/>
                 <MenuItem Header="Export Defect List To CSV" />
@@ -215,9 +215,9 @@
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.OpenFolderCommand}" />
+                            <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.Commands.OpenFolderCommand}" />
                             <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
-                            <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.RefreshCommand}"/>
+                            <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.Commands.RefreshCommand}"/>
                             
                             <!-- ProgressBar -->
                             <Grid Grid.Column="3" Margin="2">

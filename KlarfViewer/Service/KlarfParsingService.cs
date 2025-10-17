@@ -223,6 +223,7 @@ namespace KlarfViewer.Service
         }
 
         // HelperMethod for parse safety, clean by use dictionary and generic
+        [return: System.Diagnostics.CodeAnalysis.MaybeNull]
         private T GetValue<T>(string[] tokens, Dictionary<string, int> map, string key)
         {
             if (map.TryGetValue(key, out int index) && index < tokens.Length)

@@ -26,6 +26,8 @@ namespace KlarfViewer.ViewModel
             }
         }
 
+        
+        
         private FileSystemObjectViewModel? selectedFile;
         public FileSystemObjectViewModel SelectedFile
         {
@@ -44,6 +46,8 @@ namespace KlarfViewer.ViewModel
             }
         }
 
+        
+        
         private bool isParsing;
         public bool IsParsing
         {
@@ -78,58 +82,6 @@ namespace KlarfViewer.ViewModel
             Directories = new ObservableCollection<FileSystemObjectViewModel>();
             Files = new ObservableCollection<FileSystemObjectViewModel>();
             Commands = new FileListCommands(this);
-            OpenFolderCommand = new RelayCommand(ExecuteOpenFolder);
-            RefreshCommand = new RelayCommand(ExecuteRefresh);
-            SelectedItemChangedCommand = new RelayCommand<object>(ExecuteSelectedItemChanged);
-        }
-
-        private void ExecuteSelectedItemChanged(object? selectedItem)
-        {
-            if (selectedItem is FileSystemObjectViewModel fso && fso.IsDirectory)
-            {
-                SelectedDirectory = fso;
-            }
-        }
-
-        private void ExecuteOpenFolder()
-        {
-            var dialog = new OpenFileDialog
-            {
-                Title = "Select Klarf file(s)",
-                Filter = "Inspection Files (*.klarf, *.001)|*.klarf;*.001|All files (*.*)|*.*",
-                Multiselect = true
-            };
-
-            if (dialog.ShowDialog() == true)
-            {
-                if (dialog.FileNames.Length == 0) return;
-
-                string? selectedPath = Path.GetDirectoryName(dialog.FileNames[0]);
-                if (selectedPath == null) return;
-
-                Directories.Clear();
-                Files.Clear();
-
-                var rootNode = new FileSystemObjectViewModel(selectedPath, isDirectory: true);
-                fileSystemService.LoadSubDirectories(rootNode);
-                Directories.Add(rootNode);
-                SelectedDirectory = rootNode;
-            }
-        }
-
-        private void ExecuteRefresh()
-        {
-            if (SelectedDirectory != null)
-            {
-                string currentPath = SelectedDirectory.FullPath;
-                Directories.Clear();
-                Files.Clear();
-
-                var rootNode = new FileSystemObjectViewModel(currentPath, isDirectory: true);
-                fileSystemService.LoadSubDirectories(rootNode);
-                Directories.Add(rootNode);
-                SelectedDirectory = rootNode;
-            }
         }
 
         private void LoadFiles(FileSystemObjectViewModel directoryNode)

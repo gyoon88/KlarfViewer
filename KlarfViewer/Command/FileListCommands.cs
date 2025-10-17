@@ -1,3 +1,4 @@
+using KlarfViewer.Service;
 using KlarfViewer.ViewModel;
 using Microsoft.Win32;
 using System;
@@ -65,9 +66,17 @@ namespace KlarfViewer.Command
 
         private void ExecuteRefresh()
         {
-            vm.Directories.Clear();
-            vm.Files.Clear();
-            vm.SelectedDirectory = null;
+            if (vm.SelectedDirectory != null)
+            {
+                string currentPath = vm.SelectedDirectory.FullPath;
+                vm.Directories.Clear();
+                vm.Files.Clear();
+
+                var rootNode = new FileSystemObjectViewModel(currentPath, isDirectory: true);
+                vm.fileSystemService.LoadSubDirectories(rootNode);
+                vm.Directories.Add(rootNode);
+                vm.SelectedDirectory = rootNode;
+            }
         }
     }
 }

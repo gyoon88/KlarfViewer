@@ -8,6 +8,7 @@ namespace KlarfViewer.ViewModel
     public class DefectImageViewModel : BaseViewModel
     {
         private BitmapSource defectImage;
+        private BitmapSource processedImage;
         private string imageLoadingError;
         private bool isInMeasurementMode;
         private double distance;
@@ -16,13 +17,15 @@ namespace KlarfViewer.ViewModel
         public BitmapSource DefectImage
         {
             get => defectImage;
-            private set
-            {
-                defectImage = value;
-                OnPropertyChanged(nameof(DefectImage));
-            }
+            private set => SetProperty(ref defectImage, value);
+            
         }
 
+        public BitmapSource ProcessedImage
+        {
+            get => processedImage;
+            set => SetProperty(ref processedImage, value);
+        }
         public string ImageLoadingError
         {
             get => imageLoadingError;
