@@ -26,6 +26,7 @@ namespace KlarfViewer.ViewModel
             get => processedImage;
             set => SetProperty(ref processedImage, value);
         }
+
         public string ImageLoadingError
         {
             get => imageLoadingError;

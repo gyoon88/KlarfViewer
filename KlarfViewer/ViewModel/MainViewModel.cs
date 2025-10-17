@@ -1,19 +1,28 @@
 using KlarfViewer.Model;
 using KlarfViewer.Service;
 using System.ComponentModel;
-using System.Linq;
-
+using KlarfViewer.Command;
 namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
         private readonly KlarfParsingService klarfParser;
         private KlarfData currentKlarfData; // The single source of truth
+        
+
+        // command
+        private ExportCsvCommand csvCommand;
+
 
         public WaferMapViewModel WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
         public FileListViewModel FileListVM { get; private set; }
         public DefectListViewModel DefectListVM { get; private set; }
+        public ExportCsvCommand CsvCommand 
+        { 
+            get => csvCommand; 
+            private set => SetProperty(ref csvCommand, value);
+        }
 
         public MainViewModel()
         {
@@ -25,9 +34,12 @@ namespace KlarfViewer.ViewModel
             FileListVM = new FileListViewModel();
             DefectListVM = new DefectListViewModel();
 
+            // Command
+            CsvCommand = new ExportCsvCommand(this);
+
             // Subscribe to events from child VMs to handle synchronization
             FileListVM.FileSelected += OnFileSelected;
-            DefectListVM.PropertyChanged += OnDefectSelectionChanged; // DefectViewer ���� � �Ӽ��� �ٲ�� ���� ����
+            DefectListVM.PropertyChanged += OnDefectSelectionChanged; // DefectViewer 
             WaferMapVM.DieClicked += OnDieClicked;
         }
 

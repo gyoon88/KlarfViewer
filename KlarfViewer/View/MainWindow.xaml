@@ -26,7 +26,7 @@
                 <MenuItem Header="Folder Open" Command="{Binding FileListVM.Commands.OpenFolderCommand}"/>
                 <MenuItem Header="Image Save" />
                 <Separator/>
-                <MenuItem Header="Export Defect List To CSV" />
+                <MenuItem Header="Export Defect List To CSV" Command="{Binding CsvCommand.ExportToCsvCommand}" />
             </MenuItem>
             <MenuItem Header="_View">
                 <MenuItem Header="Skeletonize"/>
@@ -46,7 +46,6 @@
                 <MenuItem Header="Save"/>
             </MenuItem>
         </Menu>
-
 
         <!-- Viewer -->
         <Grid Background="{StaticResource PrimaryBrush}">

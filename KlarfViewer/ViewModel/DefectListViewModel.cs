@@ -103,8 +103,8 @@ namespace KlarfViewer.ViewModel
             TotalDefectCount = Defects.Count;
             if (klarfInfomation == null) return;
             TotalDieCount = klarfInfomation.Wafer.TotalDies;
-            OnPropertyChanged(nameof(Defects)); // defect list 
-
+            OnPropertyChanged(nameof(Defects)); // Notify DefectListVM get change to MainVM
+            //SetProperty(ref Defects, value)
             // set default using LINQ 
             SelectedDefect = Defects.FirstOrDefault();
         }
