@@ -6,122 +6,125 @@ using System.Linq;
 using System.Windows;
 using KlarfViewer.Model;
 
+using System.Threading.Tasks;
+
 namespace KlarfViewer.Service
 {
 
     public class KlarfParsingService
     {
-        /// <summary>
-        /// 지정된 경로의 Klarf 파일을 파싱하여 KlarfData 객체로 반환.
-        /// </summary>
-        /// <param name="filePath">파싱할 .klarf 파일의 전체 경로</param>
-        /// <returns>파싱된 데이터가 담긴 KlarfData 객체</returns>
-        public KlarfData Parse(string filePath)
+        public Task<KlarfData> ParseAsync(string filePath, IProgress<double> progress)
         {
-            if (!File.Exists(filePath))
+            return Task.Run(() =>
             {
-                throw new FileNotFoundException("Klarf 파일을 찾을 수 없습니다.", filePath);
-            }
-
-            KlarfData CurrentklarfData = new KlarfData { FilePath = filePath };
-            var lines = File.ReadAllLines(filePath);
-            int lineIndex = 0;
-
-            while (lineIndex < lines.Length)
-            {
-                // Text 
-                var line = lines[lineIndex].Trim();
-
-                // Continue to next line when it is empty line 
-                if (string.IsNullOrEmpty(line))
+                if (!File.Exists(filePath))
                 {
-                    lineIndex++;
-                    continue;
+                    throw new FileNotFoundException("Klarf 파일을 찾을 수 없습니다.", filePath);
                 }
 
-                string keyword;
-                string[] values;
+                KlarfData CurrentklarfData = new KlarfData { FilePath = filePath };
+                var lines = File.ReadAllLines(filePath);
+                int lineIndex = 0;
+                int totalLines = lines.Length;
 
-                int firstSpace = line.IndexOf(' '); // Retrun -1 when there are no space. Otherwise firstspace > -1 
-                if (firstSpace == -1)
+                while (lineIndex < totalLines)
                 {
-                    keyword = line.TrimEnd(';');
-                    values = Array.Empty<string>(); //  
-                    
-                }
-                else
-                {
-                    keyword = line.Substring(0, firstSpace);
-                    var remaining = line.Substring(firstSpace + 1).Trim().TrimEnd(';');
-                    values = remaining.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                }
-                try
-                {
-                    switch (keyword.ToUpper())
+                    progress?.Report((double)lineIndex / totalLines * 100);
+
+                    var line = lines[lineIndex].Trim();
+
+                    if (string.IsNullOrEmpty(line))
                     {
-                        case "WAFERID":
-                            CurrentklarfData.Wafer.WaferID = values[0].Trim('"');
-                            break;
-                        case "LOTID":
-                            CurrentklarfData.Wafer.LotID = values[0].Trim('"');
-                            break;
-                        case "SLOT":
-                            CurrentklarfData.Wafer.Slot = values[0].Trim('"');
-                            break;
-                        case "INSPECTIONSTATIONID":
-                            CurrentklarfData.Wafer.DeviceID = string.Join(" - ", values.Select(
-                                value => value.Trim('"')).Where(
-                                trimmedValue => !string.IsNullOrWhiteSpace(trimmedValue))); // 2. 따옴표 제거 후 비어있거나 공백만 남은 항목은 제외합니다.
-                            break;
-                        case "FILETIMESTAMP":
-                            string timestamp = values[0] + " " + values[1];
-                            CurrentklarfData.Wafer.FileTimestamp = DateTime.ParseExact(timestamp, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                            break;
-                        case "SAMPLECENTERLOCATION":
-                            CurrentklarfData.Wafer.SampleCenterLocation = new SampleCenter
-                            {
-                                XLoc = double.Parse(values[0], CultureInfo.InvariantCulture),
-                                YLoc = double.Parse(values[1], CultureInfo.InvariantCulture)
-                            };
-                            break;
-                        case "TIFFFILENAME":
-                            CurrentklarfData.Wafer.TiffFilename = values[0];
-                            break;
-                        case "DIEPITCH":
-                            CurrentklarfData.Wafer.DiePitch = new DieSize
-                            {
-                                Width = double.Parse(values[0], CultureInfo.InvariantCulture),
-                                Height = double.Parse(values[1], CultureInfo.InvariantCulture)
-                            };
-                            break;
-                        case "SAMPLETESTPLAN":
-                            int dieCount = int.Parse(values[0]);
-                            CurrentklarfData.Wafer.TotalDies = int.Parse(values[0]);
-                            lineIndex = ParseSampleTestPlan(lines, lineIndex + 1, dieCount, CurrentklarfData.Dies);
-                            continue;
-                        case "DEFECTRECORDSPEC":
-                            var defectHeaders = values.Skip(1).ToList();
-                            lineIndex = ParseDefectList(lines, lineIndex + 2, defectHeaders, CurrentklarfData.Defects);
-                            continue;
-                        case "ENDOFILE;":
-                        case "ENDOFFILE":
-                            lineIndex = lines.Length;
-                            break;
-                        default:
-                            break;
+                        lineIndex++;
+                        continue;
                     }
+
+                    string keyword;
+                    string[] values;
+
+                    int firstSpace = line.IndexOf(' ');
+                    if (firstSpace == -1)
+                    {
+                        keyword = line.TrimEnd(';');
+                        values = Array.Empty<string>();
+                    }
+                    else
+                    {
+                        keyword = line.Substring(0, firstSpace);
+                        var remaining = line.Substring(firstSpace + 1).Trim().TrimEnd(';');
+                        values = remaining.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    }
+
+                    try
+                    {
+                        switch (keyword.ToUpper())
+                        {
+                            case "WAFERID":
+                                CurrentklarfData.Wafer.WaferID = values[0].Trim('"');
+                                break;
+                            case "LOTID":
+                                CurrentklarfData.Wafer.LotID = values[0].Trim('"');
+                                break;
+                            case "SLOT":
+                                CurrentklarfData.Wafer.Slot = values[0].Trim('"');
+                                break;
+                            case "INSPECTIONSTATIONID":
+                                CurrentklarfData.Wafer.DeviceID = string.Join(" - ", values.Select(
+                                    value => value.Trim('"')).Where(
+                                    trimmedValue => !string.IsNullOrWhiteSpace(trimmedValue)));
+                                break;
+                            case "FILETIMESTAMP":
+                                string timestamp = values[0] + " " + values[1];
+                                CurrentklarfData.Wafer.FileTimestamp = DateTime.ParseExact(timestamp, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                                break;
+                            case "SAMPLECENTERLOCATION":
+                                CurrentklarfData.Wafer.SampleCenterLocation = new SampleCenter
+                                {
+                                    XLoc = double.Parse(values[0], CultureInfo.InvariantCulture),
+                                    YLoc = double.Parse(values[1], CultureInfo.InvariantCulture)
+                                };
+                                break;
+                            case "TIFFFILENAME":
+                                CurrentklarfData.Wafer.TiffFilename = values[0];
+                                break;
+                            case "DIEPITCH":
+                                CurrentklarfData.Wafer.DiePitch = new DieSize
+                                {
+                                    Width = double.Parse(values[0], CultureInfo.InvariantCulture),
+                                    Height = double.Parse(values[1], CultureInfo.InvariantCulture)
+                                };
+                                break;
+                            case "SAMPLETESTPLAN":
+                                int dieCount = int.Parse(values[0]);
+                                CurrentklarfData.Wafer.TotalDies = int.Parse(values[0]);
+                                lineIndex = ParseSampleTestPlan(lines, lineIndex + 1, dieCount, CurrentklarfData.Dies);
+                                continue;
+                            case "DEFECTRECORDSPEC":
+                                var defectHeaders = values.Skip(1).ToList();
+                                lineIndex = ParseDefectList(lines, lineIndex + 2, defectHeaders, CurrentklarfData.Defects);
+                                continue;
+                            case "ENDOFILE;":
+                            case "ENDOFFILE":
+                                lineIndex = lines.Length;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var log = $"Error parsing line {lineIndex + 1}: '{lines[lineIndex]}'. Error: {ex.Message}";
+                        Console.WriteLine(log);
+                        MessageBox.Show("Klarf 파싱중 에러가 발생하였습니다.", log);
+                    }
+                    lineIndex++;
                 }
-                catch (Exception ex)
-                {
-                    var log = $"Error parsing line {lineIndex + 1}: '{lines[lineIndex]}'. Error: {ex.Message}";
-                    Console.WriteLine(log);
-                    MessageBox.Show("Klarf 파싱중 에러가 발생하였습니다.", log);
-                }
-                lineIndex++;
-            }
-            ValidateParsedData(CurrentklarfData);
-            LinkDefectsToDies(CurrentklarfData);
-            return CurrentklarfData;
+
+                progress?.Report(100);
+                ValidateParsedData(CurrentklarfData);
+                LinkDefectsToDies(CurrentklarfData);
+                return CurrentklarfData;
+            });
         }
         private void ValidateParsedData(KlarfData klarfData)
         {
@@ -243,7 +246,7 @@ namespace KlarfViewer.Service
             foreach (var defect in data.Defects)
             {
                 var key = $"{defect.XIndex}_{defect.YIndex}";
-                if (dieMap.TryGetValue(key, out DieInfo die))
+                if (dieMap.TryGetValue(key, out DieInfo? die))
                 {
                     die.DefectCount++;
                     die.IsDefective = true;
@@ -253,7 +256,7 @@ namespace KlarfViewer.Service
             foreach (var defect in data.Defects)
             {
                 var key = $"{defect.XIndex}_{defect.YIndex}";
-                if (dieMap.TryGetValue(key, out DieInfo die))
+                if (dieMap.TryGetValue(key, out DieInfo? die))
                 {
                     // 최종 Defect 개수를 할당
                     defect.TotalDefectsInDie = die.DefectCount;

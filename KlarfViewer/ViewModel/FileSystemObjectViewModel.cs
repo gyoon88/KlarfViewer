@@ -25,6 +25,20 @@ namespace KlarfViewer.ViewModel
             get => children;
             set => SetProperty(ref children, value);
         }
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set => SetProperty(ref isSelected, value);
+        }
+
+        private bool isExpanded;
+        public bool IsExpanded
+        {
+            get => isExpanded;
+            set => SetProperty(ref isExpanded, value);
+        }
+
         public bool IsDirectory { get; }
 
         public DateTime LastModified { get; set; }

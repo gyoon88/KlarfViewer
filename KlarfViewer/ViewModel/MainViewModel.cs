@@ -27,19 +27,39 @@ namespace KlarfViewer.ViewModel
 
             // Subscribe to events from child VMs to handle synchronization
             FileListVM.FileSelected += OnFileSelected;
-            DefectListVM.PropertyChanged += OnDefectSelectionChanged;
+            DefectListVM.PropertyChanged += OnDefectSelectionChanged; // DefectViewer ���� � �Ӽ��� �ٲ�� ���� ����
             WaferMapVM.DieClicked += OnDieClicked;
         }
 
-        private void OnFileSelected(string filePath)
+        private async void OnFileSelected(string filePath)
         {
-            currentKlarfData = klarfParser.Parse(filePath);
-            
-            // Give each child VM a reference to the shared data model
-            WaferMapVM.LoadData(currentKlarfData);
-            DefectListVM.LoadData(currentKlarfData);
+            FileListVM.IsParsing = true;
+            FileListVM.ParsingProgress = 0;
+
+            var progress = new Progress<double>(percentage =>
+            {
+                FileListVM.ParsingProgress = percentage;
+            });
+
+            try
+            {
+                currentKlarfData = await klarfParser.ParseAsync(filePath, progress);
+                WaferMapVM.LoadData(currentKlarfData);
+                DefectListVM.LoadData(currentKlarfData);
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions from parsing
+                Console.WriteLine($"Error parsing file: {ex.Message}");
+                // Optionally, show an error message to the user
+            }
+            finally
+            {
+                FileListVM.IsParsing = false;
+            }
         }
 
+        // Defect List => WaferMapVM/DefectImageVM
         private void OnDefectSelectionChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(DefectListViewModel.SelectedDefect)) return;
@@ -58,6 +78,7 @@ namespace KlarfViewer.ViewModel
             }
         }
 
+        // DefectListVM
         private void OnDieClicked(DieInfo clickedDie)
         {
             if (clickedDie == null) return;

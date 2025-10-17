@@ -1,4 +1,4 @@
-﻿using System;
+﻿using KlarfViewer.Command;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -48,6 +48,7 @@ namespace KlarfViewer.ViewModel
         }
 
         public ICommand ToggleMeasurementModeCommand { get; }
+        public ICommand ImageProcess { get; }
 
         public DefectImageViewModel()
         {

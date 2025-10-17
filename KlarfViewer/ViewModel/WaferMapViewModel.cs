@@ -11,12 +11,12 @@ namespace KlarfViewer.ViewModel
         private readonly WaferMapService _waferMapService;
 
         // Shared data model (by reference)
-        private KlarfData _klarfData;
+        private KlarfData klarfInfomation;
         private double currentWidth;
         private double currentHeight;
 
         public ObservableCollection<ShowDieViewModel> Dies { get; private set; }
-        public Action<DieInfo> DieClicked { get; set; }
+        public Action<DieInfo> DieClicked { get; set; } // 선택된 다이
 
         public WaferMapViewModel()
         {
@@ -27,7 +27,7 @@ namespace KlarfViewer.ViewModel
         // Load data reference from MainViewModel that give Model data
         public void LoadData(KlarfData klarfData)
         {
-            _klarfData = klarfData;
+            klarfInfomation = klarfData;
             Render();
         }
 
@@ -52,13 +52,13 @@ namespace KlarfViewer.ViewModel
         private void Render()
         {
             Dies.Clear();
-            if (_klarfData == null || currentWidth <= 0 || currentHeight <= 0)
+            if (klarfInfomation == null || currentWidth <= 0 || currentHeight <= 0)
             {
                 OnPropertyChanged(nameof(Dies));
                 return;
             }
 
-            var dieViewModels = _waferMapService.CalculateDieViewModels(_klarfData.Dies, _klarfData.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
+            var dieViewModels = _waferMapService.CalculateDieViewModels(klarfInfomation.Dies, klarfInfomation.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
 
             foreach (var dieVM in dieViewModels)
             {

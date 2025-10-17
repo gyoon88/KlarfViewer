@@ -1,5 +1,5 @@
 using KlarfViewer.Model;
-using System;
+using KlarfViewer.Command;
 using System.Windows.Input;
 
 namespace KlarfViewer.ViewModel
@@ -55,7 +55,7 @@ namespace KlarfViewer.ViewModel
         }
 
         // Workaround for command binding
-        // wafermapviewer¿¡¼­ È®ÀÎÇÏ´Â ...
+        // wafermapviewerì—ì„œ í™•ì¸í•˜ëŠ” ...
         public Action<DieInfo> DieClickedAction { get; set; }
         public ICommand ClickCommand { get; }
 

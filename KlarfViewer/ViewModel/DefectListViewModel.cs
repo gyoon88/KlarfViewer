@@ -1,4 +1,5 @@
 using KlarfViewer.Model;
+using KlarfViewer.Command;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -6,7 +7,7 @@ namespace KlarfViewer.ViewModel
 {
     public class DefectListViewModel : BaseViewModel
     {
-        private KlarfData klarfInfomation;
+        private KlarfData? klarfInfomation;
 
         public KlarfData KlarfInfomation
         {
@@ -15,7 +16,7 @@ namespace KlarfViewer.ViewModel
         }
         public ObservableCollection<DefectInfo> Defects { get; private set; }
 
-        private DefectInfo selectedDefect;
+        private DefectInfo? selectedDefect;
         public DefectInfo SelectedDefect
         {
             get => selectedDefect;
@@ -27,7 +28,6 @@ namespace KlarfViewer.ViewModel
                 }
             }
         }
-
 
         // DefectID in Defects 
         private int currentDefectIndex;
@@ -75,25 +75,13 @@ namespace KlarfViewer.ViewModel
             set => SetProperty(ref totalDieCount, value);
         }
 
-        public ICommand PrevGlobalCommand { get; }
-        public ICommand NextGlobalCommand { get; }
-        public ICommand PrevInDieCommand { get; }
-        public ICommand NextInDieCommand { get; }
-        public ICommand PrevGlobalDieCommand { get; }
-        public ICommand NextGlobalDieCommand { get; }
-
+        public DefectNavigationCommands Commands { get; }
 
         // Constructor
         public DefectListViewModel()
         {
             Defects = new ObservableCollection<DefectInfo>();
-            PrevGlobalCommand = new RelayCommand(ExecutePrevGlobal, CanExecutePrevGlobal);
-            NextGlobalCommand = new RelayCommand(ExecuteNextGlobal, CanExecuteNextGlobal);
-            PrevInDieCommand = new RelayCommand(ExecutePrevInDie, CanExecutePrevInDie);
-            NextInDieCommand = new RelayCommand(ExecuteNextInDie, CanExecuteNextInDie);
-
-            PrevGlobalDieCommand = new RelayCommand(ExecutePrevGlobalDie, CanExecutePrevGlobalDie);
-            NextGlobalDieCommand = new RelayCommand(ExecuteNextGlobalDie, CanExecuteNextGlobalDie);
+            Commands = new DefectNavigationCommands(this);
         }
 
 
@@ -113,8 +101,9 @@ namespace KlarfViewer.ViewModel
                 }
             }
             TotalDefectCount = Defects.Count;
+            if (klarfInfomation == null) return;
             TotalDieCount = klarfInfomation.Wafer.TotalDies;
-            OnPropertyChanged(nameof(Defects));
+            OnPropertyChanged(nameof(Defects)); // defect list 
 
             // set default using LINQ 
             SelectedDefect = Defects.FirstOrDefault();
@@ -125,8 +114,7 @@ namespace KlarfViewer.ViewModel
         {
             if (Defects == null) return;
             SelectedDefect = Defects.FirstOrDefault(d => d.XIndex == xIndex && d.YIndex == yIndex) ?? SelectedDefect;
-            return;           
-
+            return;
         }
 
         private void UpdateDefectIndices()
@@ -135,7 +123,11 @@ namespace KlarfViewer.ViewModel
             {
                 CurrentDefectIndex = Defects.IndexOf(SelectedDefect) + 1;
                 CurrentDefectIndexInDie = SelectedDefect.DefectIdInDie;
-                DieInfo die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
+                if (selectedDefect == null) return;
+
+                DieInfo? die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
+                if (die == null) return;
+                
                 CurrentDieIndex = die.DieID;
                 TotalDefectCountInDie = SelectedDefect.TotalDefectsInDie;                
             }
@@ -143,99 +135,6 @@ namespace KlarfViewer.ViewModel
             {
                 CurrentDefectIndex = 0;
             }
-        }
-
-        // In-Die Navigation
-        private List<DefectInfo> GetDefectsInCurrentDie()
-        {
-            if (SelectedDefect == null) return new List<DefectInfo>();
-            return Defects.Where(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex).ToList();
-        }
-
-        // Global Defect Navigation
-        private void ExecutePrevGlobal()
-        {
-            int currentIndex = Defects.IndexOf(SelectedDefect);
-            SelectedDefect = Defects[currentIndex - 1];
-
-        }
-        private void ExecuteNextGlobal()
-        {
-            int currentIndex = Defects.IndexOf(SelectedDefect);
-            SelectedDefect = Defects[currentIndex + 1];
-
-        }
-
-        // Inner Die Defect Navigation
-        private void ExecutePrevInDie()
-        {                        
-            var defectsInDie = GetDefectsInCurrentDie();
-            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
-            SelectedDefect = defectsInDie[currentIndexInDie - 1];
-        }
-        private void ExecuteNextInDie()
-        {
-            var defectsInDie = GetDefectsInCurrentDie();
-            int currentIndexInDie = defectsInDie.IndexOf(SelectedDefect);
-            SelectedDefect = defectsInDie[currentIndexInDie + 1];
-        }
-        // Gloval Die Navigation
-        private void ExecuteNextGlobalDie()
-        {
-            var Die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
-            int currentDieID = Die.DieID;
-            var newDie = KlarfInfomation.Dies.FirstOrDefault(d => d.DieID > currentDieID && d.IsDefective);
-            SelectedDefect = Defects.FirstOrDefault(d => d.XIndex == newDie.XIndex && d.YIndex == newDie.YIndex);
-        }
-        private void ExecutePrevGlobalDie()
-        {
-            var currentDie = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == selectedDefect.XIndex && d.YIndex == selectedDefect.YIndex);
-            if (currentDie == null) return; // stop If there not exist 
-
-            int currentDieID = currentDie.DieID;
-
-            var prevDie = KlarfInfomation.Dies
-                .Where(d => d.DieID < currentDieID && d.IsDefective)
-                .OrderByDescending(d => d.DieID)
-                .FirstOrDefault();
-            if (prevDie != null)
-            {
-                SelectedDefect = Defects.FirstOrDefault(d => d.XIndex == prevDie.XIndex && d.YIndex == prevDie.YIndex);
-            }
-        }
-
-        // Condition of Execute - Global Defect 
-        private bool CanExecuteNextGlobal() => Defects.Any() && SelectedDefect != Defects.Last();
-        private bool CanExecutePrevGlobal() => Defects.Any() && SelectedDefect != Defects.First();
-
-        // Condition of Execute - Inner Die Defect 
-        private bool CanExecutePrevInDie()
-        {
-            if (SelectedDefect == null) return false;
-            var defectsInDie = GetDefectsInCurrentDie();
-            return defectsInDie.IndexOf(SelectedDefect) > 0;
-        }
-        private bool CanExecuteNextInDie()
-        {
-            if (SelectedDefect == null) return false;
-            var defectsInDie = GetDefectsInCurrentDie();
-            return defectsInDie.IndexOf(SelectedDefect) < defectsInDie.Count - 1;
-        }
-
-        // Condition of Execute - Global Die 
-        private bool CanExecuteNextGlobalDie()
-        {
-            if (SelectedDefect == null) return false;
-
-            var die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex);
-            return KlarfInfomation.Wafer.TotalDies > die.DieID;
-        }
-        private bool CanExecutePrevGlobalDie()
-        {
-            if (SelectedDefect == null) return false;
-
-            var die = KlarfInfomation.Dies.FirstOrDefault(d => d.XIndex == SelectedDefect.XIndex && d.YIndex == SelectedDefect.YIndex);   
-            return die.DieID > 0;
         }
     }
 }
