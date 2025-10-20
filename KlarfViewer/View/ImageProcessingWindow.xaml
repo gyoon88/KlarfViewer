@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KlarfViewer.View"
         mc:Ignorable="d"
-        Title="Image Processor" Height="600" Width="800">
+        Title="Image Processor" Height="450" Width="700">
     <Grid Background="{StaticResource PrimaryBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
