@@ -12,13 +12,22 @@
         Title="KlarfViewer" Height="800" Width="1200" MinHeight="700" MinWidth="1000">
 
     <Window.InputBindings>
-        <KeyBinding Modifiers="Control" Key="S" />
+        <KeyBinding Modifiers="Control" Key="S" Command="{Binding CsvCommand.ExportToCsvCommand}"/>
         <KeyBinding Modifiers="Control" Key="C" />
-        <KeyBinding Modifiers="Control" Key="O" />
-        <KeyBinding Modifiers="Control" Key="Z" />
-        <KeyBinding Modifiers="Control" Key="Y" />
+        
+        <KeyBinding Key="Up" Command="{Binding DefectListVM.Commands.PrevGlobalCommand}" />
+        <KeyBinding Key="Down" Command="{Binding DefectListVM.Commands.NextGlobalCommand}" />
+
+        <KeyBinding Key="Right" Command="{Binding DefectListVM.Commands.NextGlobalDieCommand}" />
+        <KeyBinding Key="Left" Command="{Binding DefectListVM.Commands.PrevGlobalDieCommand}" />
+        
+        <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding DefectListVM.Commands.NextInDieCommand}" />
+        <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding DefectListVM.Commands.PrevInDieCommand}" />
+        
+        <KeyBinding Modifiers="Control" Key="O" Command="{Binding FileListVM.Commands.OpenFolderCommand}" />
     </Window.InputBindings>
 
+   
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">

@@ -520,7 +520,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="LMgaK5fFYvEXm6MPALsB-1" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=light-dark(#d79b00, #ededed);strokeWidth=5;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="LMgaK5fFYvEXm6MPALsB-1" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=light-dark(#d79b00, #ededed);strokeWidth=5;fillColor=default;" vertex="1" parent="1">
           <mxGeometry x="1200" y="2341" width="480" height="409" as="geometry" />
         </mxCell>
         <mxCell id="LMgaK5fFYvEXm6MPALsB-2" value="DefectNavigationCommands" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
