@@ -32,6 +32,7 @@ namespace KlarfViewer.ViewModel
         }
 
         // Update size and re-render using stored data
+        // Interact with canvas size 
         public void UpdateMapSize(double newWidth, double newHeight)
         {
             currentWidth = newWidth;

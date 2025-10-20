@@ -34,9 +34,9 @@ namespace KlarfViewer.Service
                 {
                     Width = displayDieWidth,
                     Height = displayDieHeight,
-                    X = (dieInfo.XIndex - minXIdx) * displayDieWidth,
-                    Y = (maxYIdx - dieInfo.YIndex) * displayDieHeight,
-                    DieClickedAction = dieClickAction
+                    X = (dieInfo.XIndex - minXIdx) * displayDieWidth, // range(x) = 0, max(x) - min(x)
+                    Y = (maxYIdx - dieInfo.YIndex) * displayDieHeight, // range(y) = 0,  max(x) 
+                    DieClickedAction = dieClickAction // 
                 };
                 dieViewModels.Add(dieVM);
             }

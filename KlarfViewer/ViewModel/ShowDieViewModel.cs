@@ -62,7 +62,7 @@ namespace KlarfViewer.ViewModel
         public ShowDieViewModel(DieInfo die)
         {
             dieCursor = die;
-            ClickCommand = new RelayCommand(() => DieClickedAction?.Invoke(OriginalDie), () => IsDefective);
+            ClickCommand = new RelayCommand(() => DieClickedAction?.Invoke(OriginalDie), () => IsDefective); // 
         }
     }
 }

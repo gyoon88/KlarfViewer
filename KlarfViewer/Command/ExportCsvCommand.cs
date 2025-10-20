@@ -26,7 +26,7 @@
 ﻿                return;
 ﻿            }
 ﻿
-﻿            var sfd = new SaveFileDialog
+﻿            var sfd = new SaveFileDialog // Create save fiel dialog instance
 ﻿            {
 ﻿                Filter = "CSV File (*.csv)|*.csv",
 ﻿                FileName = $"{vm.DefectListVM.KlarfInfomation.Wafer.DeviceID}_Defects.csv"
@@ -34,7 +34,8 @@
 ﻿
 ﻿            if (sfd.ShowDialog() == true)
 ﻿            {
-﻿                var headers = new string[] { "DEFECTID", "XINDEX", "YINDEX", "XSIZE", "YSIZE", "XREL", "YREL", "DEFECTAREA", "DSIZE", "DEFECTIDINDIE", "TOTALDEFECTSINDIE" };
+﻿                var headers = new string[] { "DEFECTID", "XINDEX", "YINDEX", "XSIZE", "YSIZE", "XREL", "YREL", 
+                    "DEFECTAREA", "DSIZE", "DEFECTIDINDIE", "TOTALDEFECTSINDIE" };
 ﻿                var data = vm.DefectListVM.Defects.Select(d => new string[]
 ﻿                {
 ﻿                    d.Id.ToString(),
