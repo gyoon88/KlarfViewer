@@ -17,10 +17,8 @@
         
         <KeyBinding Key="Up" Command="{Binding DefectListVM.Commands.PrevGlobalCommand}" />
         <KeyBinding Key="Down" Command="{Binding DefectListVM.Commands.NextGlobalCommand}" />
-
         <KeyBinding Key="Right" Command="{Binding DefectListVM.Commands.NextGlobalDieCommand}" />
-        <KeyBinding Key="Left" Command="{Binding DefectListVM.Commands.PrevGlobalDieCommand}" />
-        
+        <KeyBinding Key="Left" Command="{Binding DefectListVM.Commands.PrevGlobalDieCommand}" />        
         <KeyBinding Modifiers="Shift" Key="Right" Command="{Binding DefectListVM.Commands.NextInDieCommand}" />
         <KeyBinding Modifiers="Shift" Key="Left" Command="{Binding DefectListVM.Commands.PrevInDieCommand}" />
         
@@ -142,6 +140,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Text="Defect Viewer" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,5,5,5" FontSize="14" Foreground="White" />
+                    <Button Grid.Row="0" Content="Image Processor" Command="{Binding OpenImageProcessingWindowCommand}" HorizontalAlignment="Right" Margin="5"/>
                     <Grid Margin="5" Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

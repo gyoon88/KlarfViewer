@@ -9,9 +9,14 @@ namespace ImaGy
     namespace Wrapper
     {
         // Color Contrast
-        void NativeProcessor::ApplyAdjBrightness(IntPtr pixels, int width, int height, int stride, int value)
+        void NativeProcessor::ApplyBrightnessContrast(IntPtr pixels, int width, int height, int stride, int brightness, double contrast)
         {
-            ImaGyNative::NativeCore::ApplyAdjBrightness(pixels.ToPointer(), width, height, stride, value);
+            ImaGyNative::NativeCore::ApplyBrightnessContrast(pixels.ToPointer(), width, height, stride, brightness, contrast);
+        }
+
+        void NativeProcessor::ApplyBrightnessContrastColor(IntPtr pixels, int width, int height, int stride, int brightness, double contrast)
+        {
+            ImaGyNative::NativeCore::ApplyBrightnessContrastColor(pixels.ToPointer(), width, height, stride, brightness, contrast);
         }
 
         void NativeProcessor::ApplyBinarization(IntPtr pixels, int width, int height, int stride, int threshold)
@@ -32,9 +37,11 @@ namespace ImaGy
         {
             ImaGyNative::NativeCore::ApplyEqualizationColor(pixels.ToPointer(), width, height, stride, threshold);
         }
-        void NativeProcessor::ApplyHistogram(IntPtr pixels, int width, int height, int stride, int* hist)
+        void NativeProcessor::ApplyHistogram(IntPtr pixels, int width, int height, int stride, array<int>^ hist)
         {
-            ImaGyNative::NativeCore::ApplyHistogram(pixels.ToPointer(), width, height, stride, hist);
+            pin_ptr<int> pinnedHist = &hist[0];
+            int* nativeHist = pinnedHist;
+            ImaGyNative::NativeCore::ApplyHistogram(pixels.ToPointer(), width, height, stride, nativeHist);
         }
 
         // Edge Detect

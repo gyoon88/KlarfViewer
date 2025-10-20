@@ -2,6 +2,9 @@ using KlarfViewer.Model;
 using KlarfViewer.Service;
 using System.ComponentModel;
 using KlarfViewer.Command;
+using System.Windows.Input;
+using KlarfViewer.View;
+
 namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
@@ -24,6 +27,8 @@ namespace KlarfViewer.ViewModel
             private set => SetProperty(ref csvCommand, value);
         }
 
+        public ICommand OpenImageProcessingWindowCommand { get; }
+
         public MainViewModel()
         {
             klarfParser = new KlarfParsingService();
@@ -36,11 +41,28 @@ namespace KlarfViewer.ViewModel
 
             // Command
             CsvCommand = new ExportCsvCommand(this);
+            OpenImageProcessingWindowCommand = new RelayCommand(OpenImageProcessingWindow, CanOpenImageProcessingWindow);
 
             // Subscribe to events from child VMs to handle synchronization
             FileListVM.FileSelected += OnFileSelected;
             DefectListVM.PropertyChanged += OnDefectSelectionChanged; // DefectViewer 
             WaferMapVM.DieClicked += OnDieClicked;
+
+        }
+
+        private bool CanOpenImageProcessingWindow()
+        {
+            return DefectImageVM.DefectImage != null;
+        }
+
+        private void OpenImageProcessingWindow()
+        {
+            var imageProcessingViewModel = new ImageProcessingViewModel(DefectImageVM.DefectImage);
+            var imageProcessingWindow = new ImageProcessingWindow
+            {
+                DataContext = imageProcessingViewModel
+            };
+            imageProcessingWindow.Show();
         }
 
         private async void OnFileSelected(string filePath)

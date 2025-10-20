@@ -10,7 +10,6 @@ namespace KlarfViewer.Command
     public class DefectNavigationCommands
     {
         private readonly DefectListViewModel vm;
-
         public ICommand PrevGlobalCommand { get; }
         public ICommand NextGlobalCommand { get; }
         public ICommand PrevInDieCommand { get; }
@@ -21,15 +20,6 @@ namespace KlarfViewer.Command
         public DefectNavigationCommands(DefectListViewModel viewModel)
         {
             vm = viewModel;
-            //vm.PropertyChanged += (s, e) =>
-            //{
-            //    (PrevGlobalCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //    (NextGlobalCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //    (PrevInDieCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //    (NextInDieCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //    (PrevGlobalDieCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //    (NextGlobalDieCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            //};
 
             PrevGlobalCommand = new RelayCommand(ExecutePrevGlobal, CanExecutePrevGlobal);
             NextGlobalCommand = new RelayCommand(ExecuteNextGlobal, CanExecuteNextGlobal);

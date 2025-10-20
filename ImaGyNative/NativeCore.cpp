@@ -29,16 +29,41 @@ namespace ImaGyNative
         return is_available;
     }
 
-    void NativeCore::ApplyAdjBrightness(void* pixels, int width, int height, int stride, int value){
+    void NativeCore::ApplyBrightnessContrast(void* pixels, int width, int height, int stride, int brightness, double contrast)
+    {
         unsigned char* pixelData = static_cast<unsigned char*>(pixels);
 
 #pragma omp parallel for
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
                 int index = i * stride + j;
-                // 픽셀 값 + value가 0~255 범위를 벗어나지 않도록 클램핑(clamping)
-                int newValue = static_cast<int>(pixelData[index]) + value;
+                double factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+                int newValue = static_cast<int>(factor * (pixelData[index] - 128) + 128 + brightness);
                 pixelData[index] = static_cast<unsigned char>(std::max(0, std::min(255, newValue)));
+            }
+        }
+    }
+
+    void NativeCore::ApplyBrightnessContrastColor(void* pixels, int width, int height, int stride, int brightness, double contrast)
+    {
+        unsigned char* pixelData = static_cast<unsigned char*>(pixels);
+        int pixelSize = stride / width;
+
+#pragma omp parallel for
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
+                int index = i * stride + j * pixelSize;
+                double factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+
+                for (int c = 0; c < 3; c++) // B, G, R channels
+                {
+                    int newValue = static_cast<int>(factor * (pixelData[index + c] - 128) + 128 + brightness);
+                    pixelData[index + c] = static_cast<unsigned char>(std::max(0, std::min(255, newValue)));
+                }
             }
         }
     }

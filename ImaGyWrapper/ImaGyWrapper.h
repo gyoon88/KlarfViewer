@@ -21,15 +21,16 @@ namespace ImaGy
         public ref class NativeProcessor
         {
         public:
-            // // Color Contrast
-            static void ApplyAdjBrightness(IntPtr pixels, int width, int height, int stride, int value);
+            // Color Contrast
+            static void ApplyBrightnessContrast(IntPtr pixels, int width, int height, int stride, int brightness, double contrast);
+            static void ApplyBrightnessContrastColor(IntPtr pixels, int width, int height, int stride, int brightness, double contrast);
 
             static void ApplyBinarization(IntPtr pixels, int width, int height, int stride, int threshold);
             static void ApplyEqualization(IntPtr pixels, int width, int height, int stride, Byte threshold);
             static void ApplyEqualizationColor(IntPtr pixels, int width, int height, int stride, Byte threshold);
             static void ApplyKMeansClustering(IntPtr pixels, int width, int height, int stride, int k, int iteration, bool location);
 
-            static void ApplyHistogram(IntPtr pixels, int width, int height, int stride, int* hist);
+        static void ApplyHistogram(IntPtr pixels, int width, int height, int stride, array<int>^ hist);
 
             // EdgeDetect
             static void ApplyDifferential(IntPtr pixels, int width, int height, int stride, Byte threshold);
