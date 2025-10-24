@@ -3,63 +3,11 @@ using System;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
+
 namespace KlarfViewer.utils
 {
     public static class CSharpImageProcessor
     {
-        // =================================================================
-        // Histogram
-        // =================================================================
-
-        public static (int[] R, int[] G, int[] B) CalculateColorHistograms(BitmapSource imageSource)
-        {
-            if (imageSource.Format != PixelFormats.Bgra32)
-            {
-                imageSource = new FormatConvertedBitmap(imageSource, PixelFormats.Bgra32, null, 0);
-            }
-
-            int width = imageSource.PixelWidth;
-            int height = imageSource.PixelHeight;
-            int stride = width * 4;
-            byte[] pixels = new byte[height * stride];
-            imageSource.CopyPixels(pixels, stride, 0);
-
-            int[] rHist = new int[256];
-            int[] gHist = new int[256];
-            int[] bHist = new int[256];
-
-            for (int i = 0; i < pixels.Length; i += 4)
-            {
-                bHist[pixels[i]]++;
-                gHist[pixels[i + 1]]++;
-                rHist[pixels[i + 2]]++;
-            }
-
-            return (rHist, gHist, bHist);
-        }
-
-        public static int[] CalculateGrayscaleHistogram(BitmapSource imageSource)
-        {
-            if (imageSource.Format != PixelFormats.Gray8)
-            {
-                imageSource = new FormatConvertedBitmap(imageSource, PixelFormats.Gray8, null, 0);
-            }
-
-            int width = imageSource.PixelWidth;
-            int height = imageSource.PixelHeight;
-            int stride = width;
-            byte[] pixels = new byte[height * stride];
-            imageSource.CopyPixels(pixels, stride, 0);
-
-            int[] histogram = new int[256];
-            foreach (byte pixel in pixels)
-            {
-                histogram[pixel]++;
-            }
-
-            return histogram;
-        }
-
         // =================================================================
         // Brightness & Contrast
         // =================================================================
@@ -188,4 +136,5 @@ namespace KlarfViewer.utils
             return kernel;
         }
     }
-}
+}        
+        

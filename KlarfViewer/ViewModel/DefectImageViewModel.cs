@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using KlarfViewer.Service;
 
 namespace KlarfViewer.ViewModel
 {
@@ -51,13 +52,20 @@ namespace KlarfViewer.ViewModel
             set => SetProperty(ref zoomLevel, value);
         }
 
-        public ICommand ToggleMeasurementModeCommand { get; }
-        public ICommand ImageProcess { get; }
+        public ICommand ToggleMeasurementModeCommand { get; } 
+        public ICommand ShowHistogramCommand { get; } 
 
         public DefectImageViewModel()
         {
             ToggleMeasurementModeCommand = new RelayCommand(() => IsInMeasurementMode = !IsInMeasurementMode);
+            ShowHistogramCommand = new RelayCommand(ShowHistogram);
             ZoomLevel = 100.0;
+        }
+
+        private void ShowHistogram()
+        {
+            var histogramService = new HistogramService();
+            histogramService.ShowHistogram(DefectImage);
         }
 
         public void UpdateImage(string tiffFilePath, int imageId)
