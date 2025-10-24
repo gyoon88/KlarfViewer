@@ -8,7 +8,7 @@ namespace KlarfViewer.utils
     public static class CSharpImageProcessor
     {
         // =================================================================
-        // --- Histogram ---
+        // Histogram
         // =================================================================
 
         public static (int[] R, int[] G, int[] B) CalculateColorHistograms(BitmapSource imageSource)
@@ -61,7 +61,7 @@ namespace KlarfViewer.utils
         }
 
         // =================================================================
-        // --- Brightness & Contrast ---
+        // Brightness & Contrast
         // =================================================================
 
         public static BitmapSource ApplyBrightnessContrast(BitmapSource source, int brightness, double contrast)

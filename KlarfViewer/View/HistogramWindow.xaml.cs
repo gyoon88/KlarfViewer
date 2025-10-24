@@ -13,7 +13,7 @@ namespace KlarfViewer.View
     /// </summary>
     public partial class HistogramWindow : Window
     {
-        private HistogramViewModel? _viewModel;
+        private HistogramViewModel? viewModel;
         private const double AxisMargin = 10; // Margin for axis labels
         public HistogramWindow()
         {
@@ -24,10 +24,10 @@ namespace KlarfViewer.View
 
         private void HistogramWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _viewModel = DataContext as HistogramViewModel;
-            if (_viewModel == null) return;
+            viewModel = DataContext as HistogramViewModel;
+            if (viewModel == null) return;
 
-            _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
             DrawUI();
         }
 
@@ -50,7 +50,7 @@ namespace KlarfViewer.View
             XAxisLabelsPanel.Children.Clear();
             YAxisLabelsPanel.Children.Clear();
 
-            if (_viewModel == null || _viewModel.MaxHistogramValue == 0) return;
+            if (viewModel == null || viewModel.MaxHistogramValue == 0) return;
 
             DrawAxes();
             DrawHistogram();
@@ -90,25 +90,25 @@ namespace KlarfViewer.View
 
         private void DrawHistogram()
         {
-            if (_viewModel == null) return;
+            if (viewModel == null) return;
 
-            if (_viewModel.IsColorImage)
+            if (viewModel.IsColorImage)
             {
-                DrawChannelHistogram(_viewModel.R_HistogramData, Color.FromArgb(128, 255, 0, 0)); // Red
-                DrawChannelHistogram(_viewModel.G_HistogramData, Color.FromArgb(128, 0, 255, 0)); // Green
-                DrawChannelHistogram(_viewModel.B_HistogramData, Color.FromArgb(128, 0, 0, 255)); // Blue
+                DrawChannelHistogram(viewModel.R_HistogramData, Color.FromArgb(128, 255, 0, 0)); // Red
+                DrawChannelHistogram(viewModel.G_HistogramData, Color.FromArgb(128, 0, 255, 0)); // Green
+                DrawChannelHistogram(viewModel.B_HistogramData, Color.FromArgb(128, 0, 0, 255)); // Blue
             }
             else
             {
-                DrawChannelHistogram(_viewModel.GrayscaleHistogramData, Colors.WhiteSmoke);
+                DrawChannelHistogram(viewModel.GrayscaleHistogramData, Colors.WhiteSmoke);
             }
         }
 
         private void DrawChannelHistogram(int[]? data, Color color)
         {
-            if (data == null || data.Length == 0 || _viewModel == null) return;
+            if (data == null || data.Length == 0 || viewModel == null) return;
 
-            int max = _viewModel.MaxHistogramValue;
+            int max = viewModel.MaxHistogramValue;
             if (max == 0) return;
 
             double canvasWidth = HistogramCanvas.ActualWidth;
@@ -159,11 +159,11 @@ namespace KlarfViewer.View
 
         private void DrawYAxisLabels()
         {
-            if (_viewModel == null) return;
+            if (viewModel == null) return;
 
             double canvasHeight = YAxisLabelsPanel.ActualHeight;
             const int labelCount = 4; // Number of labels to show
-            int max = _viewModel.MaxHistogramValue;
+            int max = viewModel.MaxHistogramValue;
 
             YAxisLabelsPanel.RowDefinitions.Clear();
 

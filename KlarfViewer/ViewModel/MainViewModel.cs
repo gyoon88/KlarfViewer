@@ -10,25 +10,16 @@ namespace KlarfViewer.ViewModel
     public class MainViewModel : BaseViewModel
     {
         private readonly KlarfParsingService klarfParser;
-        private KlarfData currentKlarfData; // The single source of truth
-        
-
-        // command
-        private ExportCsvCommand csvCommand;
-
+        private KlarfData currentKlarfData; // The single source of truth        
 
         public WaferMapViewModel WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
         public FileListViewModel FileListVM { get; private set; }
         public DefectListViewModel DefectListVM { get; private set; }
-        public ExportCsvCommand CsvCommand 
-        { 
-            get => csvCommand; 
-            private set => SetProperty(ref csvCommand, value);
-        }
-
-        public ICommand OpenImageProcessingWindowCommand { get; }
-
+        public ImageProcessingViewModel ImageProcessingVM { get; private set; }
+        public ExportCsvCommand CsvCommand { get; private set; }
+        public ImageProcessingWindowCommand ImageProcessingCommand { get; private set; }
+        public HistogramCommand ShowHistogramCommand { get; private set; }
         public MainViewModel()
         {
             klarfParser = new KlarfParsingService();
@@ -38,10 +29,11 @@ namespace KlarfViewer.ViewModel
             DefectImageVM = new DefectImageViewModel();
             FileListVM = new FileListViewModel();
             DefectListVM = new DefectListViewModel();
-
+            ImageProcessingVM = new ImageProcessingViewModel(DefectImageVM.DefectImage);
             // Command
             CsvCommand = new ExportCsvCommand(this);
-            OpenImageProcessingWindowCommand = new RelayCommand(OpenImageProcessingWindow, CanOpenImageProcessingWindow);
+            ImageProcessingCommand = new ImageProcessingWindowCommand(this);
+            ShowHistogramCommand = new HistogramCommand(this);
 
             // Subscribe to events from child VMs to handle synchronization
             FileListVM.FileSelected += OnFileSelected;
@@ -49,22 +41,6 @@ namespace KlarfViewer.ViewModel
             WaferMapVM.DieClicked += OnDieClicked;
 
         }
-
-        private bool CanOpenImageProcessingWindow()
-        {
-            return DefectImageVM.DefectImage != null;
-        }
-
-        private void OpenImageProcessingWindow()
-        {
-            var imageProcessingViewModel = new ImageProcessingViewModel(DefectImageVM.DefectImage);
-            var imageProcessingWindow = new ImageProcessingWindow
-            {
-                DataContext = imageProcessingViewModel
-            };
-            imageProcessingWindow.Show();
-        }
-
         private async void OnFileSelected(string filePath)
         {
             FileListVM.IsParsing = true;

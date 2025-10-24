@@ -8,17 +8,17 @@ namespace KlarfViewer.ViewModel
 {
     public class ImageProcessingViewModel : BaseViewModel
     {
-        private BitmapSource _originalImage;
-        private BitmapSource _processedImage;
+        private BitmapSource originalImage;
+        private BitmapSource processedImage;
 
-        private int _brightness;
-        private double _contrast;
-        private int _blurRadius;
+        private int brightness;
+        private double contrast;
+        private int blurRadius;
 
         public ImageProcessingViewModel(BitmapSource image)
         {
-            _originalImage = image;
-            _processedImage = image;
+            originalImage = image;
+            processedImage = image;
 
             ApplyChangesCommand = new RelayCommand(ApplyChanges);
             ShowHistogramCommand = new RelayCommand(ShowHistogram);
@@ -26,44 +26,43 @@ namespace KlarfViewer.ViewModel
 
         public BitmapSource ProcessedImage
         {
-            get => _processedImage;
-            set
-            {
-                _processedImage = value;
-                OnPropertyChanged();
-            }
+            get => processedImage;
+            set => SetProperty(ref processedImage, value);
         }
 
         public int Brightness
         {
-            get => _brightness;
+            get => brightness;
             set
             {
-                _brightness = value;
-                OnPropertyChanged();
-                ApplyChanges(); // Apply changes automatically
+                if (SetProperty(ref brightness, value))
+                {
+                    ApplyChanges(); // Apply changes automatically
+                }
             }
         }
 
         public double Contrast
         {
-            get => _contrast;
+            get => contrast;
             set
             {
-                _contrast = value;
-                OnPropertyChanged();
-                ApplyChanges(); // Apply changes automatically
+                if (SetProperty(ref contrast, value))
+                {
+                    ApplyChanges(); // Apply changes automatically
+                }
             }
         }
 
         public int BlurRadius
         {
-            get => _blurRadius;
+            get => blurRadius;
             set
             {
-                _blurRadius = value;
-                OnPropertyChanged();
-                ApplyChanges(); // Apply changes automatically
+                if (SetProperty(ref blurRadius, value))
+                {
+                    ApplyChanges(); // Apply changes automatically
+                }
             }
         }
 
@@ -72,7 +71,7 @@ namespace KlarfViewer.ViewModel
 
         private void ApplyChanges()
         {
-            BitmapSource tempImage = _originalImage;
+            BitmapSource tempImage = originalImage;
 
             // Apply Brightness and Contrast together
             if (Brightness != 0 || Contrast != 0)

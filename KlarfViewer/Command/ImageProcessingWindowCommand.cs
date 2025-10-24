@@ -3,18 +3,16 @@ using System.Windows.Input;
 
 namespace KlarfViewer.Command
 {
-    public class MainViewCommands
+    public class ImageProcessingWindowCommand
     {
         private readonly MainViewModel vm;
 
         public ICommand OpenImageProcessingWindowCommand { get; }
-        public ExportCsvCommand CsvCommand { get; }
 
-        public MainViewCommands(MainViewModel viewModel)
+        public ImageProcessingWindowCommand(MainViewModel viewModel)
         {
             vm = viewModel;
             OpenImageProcessingWindowCommand = new RelayCommand(OpenImageProcessingWindow, CanOpenImageProcessingWindow);
-            CsvCommand = new ExportCsvCommand(vm);
         }
 
         private bool CanOpenImageProcessingWindow()

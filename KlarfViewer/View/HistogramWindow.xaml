@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:KlarfViewer.View"
         xmlns:vm="clr-namespace:KlarfViewer.ViewModel"
         mc:Ignorable="d"
-        Title="Analysis" Height="450" Width="800"
+        Title="Analysis" Height="450" Width="600"
         d:DataContext="{d:DesignInstance Type=vm:HistogramViewModel, IsDesignTimeCreatable=True}">
     
     <Grid Background="{StaticResource PrimaryBrush}">
