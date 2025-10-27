@@ -11,7 +11,7 @@ namespace KlarfViewer.ViewModel
     public class MainViewModel : BaseViewModel
     {
         private readonly KlarfParsingService klarfParser;
-        private KlarfData currentKlarfData; // The single source of truth        
+        public KlarfData currentKlarfData; // The single source of truth        
 
         public WaferMapViewModel WaferMapVM { get; private set; }
         public DefectImageViewModel DefectImageVM { get; private set; }
@@ -32,6 +32,11 @@ namespace KlarfViewer.ViewModel
         public void AddModifiedImage(int defectId, BitmapSource image)
         {
             ModifiedImages[defectId] = image;
+        }
+
+        public KlarfData GetCurrentKlarfData()
+        {
+            return currentKlarfData;
         }
 
         public MainViewModel()

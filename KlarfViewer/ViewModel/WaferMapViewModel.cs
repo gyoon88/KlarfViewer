@@ -59,7 +59,7 @@ namespace KlarfViewer.ViewModel
                 return;
             }
 
-            var dieViewModels = waferMapService.CalculateDieViewModels(klarfInfomation.Dies, klarfInfomation.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
+            List<ShowDieViewModel> dieViewModels = waferMapService.CalculateDieViewModels(klarfInfomation.Dies, klarfInfomation.Wafer, currentWidth, currentHeight, (dieInfo) => DieClicked?.Invoke(dieInfo));
 
             foreach (var dieVM in dieViewModels)
             {

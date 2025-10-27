@@ -132,9 +132,7 @@ namespace KlarfViewer.ViewModel
             OnPropertyChanged(nameof(G_HistogramData));
             OnPropertyChanged(nameof(B_HistogramData));
             OnPropertyChanged(nameof(GrayscaleHistogramData));
-        }
-
-        
+        }                
 
         private void SetStatistics(HistogramStatistics stats)
         {

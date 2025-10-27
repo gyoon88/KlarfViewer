@@ -96,6 +96,10 @@ namespace KlarfViewer.ViewModel
             {
                 DefectImageViewer.DefectImage = ProcessedImage;
                 MainVM.AddModifiedImage(MainVM.DefectListVM.SelectedDefect.Id, ProcessedImage);
+                Brightness = 0;
+                Contrast = 0;
+                BlurRadius = 0;
+                Sigma = 0;
             }
         }
 

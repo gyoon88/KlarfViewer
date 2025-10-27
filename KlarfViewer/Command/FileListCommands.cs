@@ -2,9 +2,12 @@ using KlarfViewer.Service;
 using KlarfViewer.ViewModel;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace KlarfViewer.Command
 {
@@ -51,7 +54,44 @@ namespace KlarfViewer.Command
 
             if (dialog.ShowDialog() == true)
             {
-                mainVM.CsvCommand.ExportImages(dialog.FileName, mainVM.ModifiedImages.Values.ToList());
+                var imagesToExport = new List<BitmapSource>();
+                var currentKlarfData = mainVM.GetCurrentKlarfData();
+
+                if (currentKlarfData == null || currentKlarfData.Defects == null)
+                {
+                    return;
+                }
+
+                string tiffFilePath = Path.Combine(Path.GetDirectoryName(currentKlarfData.FilePath), currentKlarfData.Wafer.TiffFilename);
+                if (!File.Exists(tiffFilePath))
+                {
+                    // Handle file not found error
+                    return;
+                }
+
+                var decoder = new TiffBitmapDecoder(
+                    new Uri(tiffFilePath, UriKind.Absolute),
+                    BitmapCreateOptions.PreservePixelFormat,
+                    BitmapCacheOption.OnLoad
+                );
+
+                foreach (var defect in currentKlarfData.Defects.OrderBy(d => d.Id))
+                {
+                    if (mainVM.ModifiedImages.TryGetValue(defect.Id, out BitmapSource modifiedImage))
+                    {
+                        imagesToExport.Add(modifiedImage);
+                    }
+                    else
+                    {
+                        int frameIndex = defect.Id - 1;
+                        if (frameIndex >= 0 && frameIndex < decoder.Frames.Count)
+                        {
+                            imagesToExport.Add(decoder.Frames[frameIndex]);
+                        }
+                    }
+                }
+
+                mainVM.CsvCommand.ExportImages(dialog.FileName, imagesToExport);
             }
         }
 
