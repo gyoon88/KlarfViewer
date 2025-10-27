@@ -72,16 +72,12 @@ namespace KlarfViewer.ViewModel
         public ObservableCollection<FileSystemObjectViewModel> Directories { get; }
         public ObservableCollection<FileSystemObjectViewModel> Files { get; }
 
-        public ICommand OpenFolderCommand { get; }
-        public ICommand SelectedItemChangedCommand { get; }
-        public ICommand RefreshCommand { get; }
-
-        public FileListViewModel()
+        public FileListViewModel(MainViewModel mainVM)
         {
             fileSystemService = new FileSystemService();
             Directories = new ObservableCollection<FileSystemObjectViewModel>();
             Files = new ObservableCollection<FileSystemObjectViewModel>();
-            Commands = new FileListCommands(this);
+            Commands = new FileListCommands(this, mainVM);
         }
 
         private void LoadFiles(FileSystemObjectViewModel directoryNode)

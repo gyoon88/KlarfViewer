@@ -4,7 +4,8 @@ using System.ComponentModel;
 using KlarfViewer.Command;
 using System.Windows.Input;
 using KlarfViewer.View;
-
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 namespace KlarfViewer.ViewModel
 {
     public class MainViewModel : BaseViewModel
@@ -18,22 +19,63 @@ namespace KlarfViewer.ViewModel
         public DefectListViewModel DefectListVM { get; private set; }
         public ImageProcessingViewModel ImageProcessingVM { get; private set; }
         public ExportCsvCommand CsvCommand { get; private set; }
-        public ImageProcessingWindowCommand ImageProcessingCommand { get; private set; }
-        public HistogramCommand ShowHistogramCommand { get; private set; }
+        public HistogramViewModel HistogramVM { get; private set; }
+
+        public Dictionary<int, BitmapSource> ModifiedImages { get; } = new Dictionary<int, BitmapSource>();
+
+        private HistogramWindow _histogramWindow;
+        private ImageProcessingWindow _imageProcessingWindow;
+
+        public ICommand ShowHistogramCommand { get; private set; }
+        public ICommand ShowImageProcessingWindowCommand { get; private set; }
+
+        public void AddModifiedImage(int defectId, BitmapSource image)
+        {
+            ModifiedImages[defectId] = image;
+        }
+
         public MainViewModel()
         {
             klarfParser = new KlarfParsingService();
 
             // Initialize child ViewModels
             WaferMapVM = new WaferMapViewModel();
-            DefectImageVM = new DefectImageViewModel();
-            FileListVM = new FileListViewModel();
+            DefectImageVM = new DefectImageViewModel(this);
+            FileListVM = new FileListViewModel(this);
             DefectListVM = new DefectListViewModel();
-            ImageProcessingVM = new ImageProcessingViewModel(DefectImageVM.DefectImage);
+            ImageProcessingVM = new ImageProcessingViewModel(DefectImageVM, this);
+            HistogramVM = new HistogramViewModel(this);
+
+            _histogramWindow = new HistogramWindow() { DataContext = HistogramVM };
+            _imageProcessingWindow = new ImageProcessingWindow() { DataContext = ImageProcessingVM };
+
             // Command
             CsvCommand = new ExportCsvCommand(this);
-            ImageProcessingCommand = new ImageProcessingWindowCommand(this);
-            ShowHistogramCommand = new HistogramCommand(this);
+            ShowImageProcessingWindowCommand = new RelayCommand(() =>
+            {
+                if (_imageProcessingWindow == null || !_imageProcessingWindow.IsVisible)
+                {
+                    _imageProcessingWindow = new ImageProcessingWindow() { DataContext = ImageProcessingVM };
+                    _imageProcessingWindow.Show();
+                }
+                else
+                {
+                    _imageProcessingWindow.Activate();
+                }
+            }, () => DefectImageVM.DefectImage != null);
+
+            ShowHistogramCommand = new RelayCommand(() => 
+            {
+                if (_histogramWindow == null || !_histogramWindow.IsVisible)
+                {
+                    _histogramWindow = new HistogramWindow() { DataContext = HistogramVM };
+                    _histogramWindow.Show();
+                }
+                else
+                {
+                    _histogramWindow.Activate();
+                }
+            }, () => DefectImageVM.DefectImage != null);
 
             // Subscribe to events from child VMs to handle synchronization
             FileListVM.FileSelected += OnFileSelected;

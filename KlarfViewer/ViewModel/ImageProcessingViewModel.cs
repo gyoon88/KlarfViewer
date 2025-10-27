@@ -1,8 +1,9 @@
-using KlarfViewer.utils;
-using System.Windows.Media.Imaging;
-using System.Windows.Input;
 using KlarfViewer.Command;
 using KlarfViewer.Service;
+using KlarfViewer.utils;
+using System.ComponentModel;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace KlarfViewer.ViewModel
 {
@@ -14,15 +15,12 @@ namespace KlarfViewer.ViewModel
         private int brightness;
         private double contrast;
         private int blurRadius;
+        private double sigma = 1.0;
 
-        public ImageProcessingViewModel(BitmapSource image)
-        {
-            originalImage = image;
-            processedImage = image;
+        private DefectImageViewModel DefectImageViewer;
 
-            ApplyChangesCommand = new RelayCommand(ApplyChanges);
-            ShowHistogramCommand = new RelayCommand(ShowHistogram);
-        }
+
+        private MainViewModel MainVM { get; set; }
 
         public BitmapSource ProcessedImage
         {
@@ -66,9 +64,49 @@ namespace KlarfViewer.ViewModel
             }
         }
 
-        public ICommand ApplyChangesCommand { get; }
-        public ICommand ShowHistogramCommand { get; }
+        public double Sigma
+        {
+            get => sigma;
+            set
+            {
+                if (SetProperty(ref sigma, value))
+                {
+                    ApplyChanges();
+                }
+            }
+        }
 
+        public ICommand ApplyChangesCommand { get; }
+        public ICommand ApplyToSourceCommand { get; }
+
+        public ImageProcessingViewModel(DefectImageViewModel DefectImageVM, MainViewModel mainVM)
+        {
+            MainVM = mainVM;
+            DefectImageViewer = DefectImageVM;
+            originalImage = DefectImageViewer.DefectImage;
+            processedImage = DefectImageViewer.DefectImage;
+            DefectImageViewer.PropertyChanged += OnDefectImageChanged;
+            ApplyChangesCommand = new RelayCommand(ApplyChanges);
+            ApplyToSourceCommand = new RelayCommand(ApplyToSource);
+        }
+
+        public void ApplyToSource()
+        {
+            if (MainVM.DefectListVM.SelectedDefect != null)
+            {
+                DefectImageViewer.DefectImage = ProcessedImage;
+                MainVM.AddModifiedImage(MainVM.DefectListVM.SelectedDefect.Id, ProcessedImage);
+            }
+        }
+
+        private void OnDefectImageChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DefectImageViewModel.DefectImage))
+            {
+                originalImage = DefectImageViewer.DefectImage;
+                ApplyChanges();
+            }
+        }
         private void ApplyChanges()
         {
             BitmapSource tempImage = originalImage;
@@ -82,16 +120,12 @@ namespace KlarfViewer.ViewModel
             // Then apply blur
             if (BlurRadius > 0)
             {
-                tempImage = CSharpImageProcessor.ApplyGaussianBlur(tempImage, BlurRadius);
+                tempImage = CSharpImageProcessor.ApplyGaussianBlur(tempImage, BlurRadius, Sigma);
             }
 
             ProcessedImage = tempImage;
         }
 
-        private void ShowHistogram()
-        {
-            var histogramService = new HistogramService();
-            histogramService.ShowHistogram(ProcessedImage);
-        }
+
     }
 }

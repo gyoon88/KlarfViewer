@@ -12,12 +12,17 @@ namespace KlarfViewer.utils
         // Brightness & Contrast
         // =================================================================
 
-        public static BitmapSource ApplyBrightnessContrast(BitmapSource source, int brightness, double contrast)
+        public static BitmapSource ApplyBrightnessContrast(BitmapSource? source, int brightness, double contrast)
         {
+            if (source == null)
+            {
+                return source;
+            }
             if (source.Format != PixelFormats.Bgra32)
             {
                 source = new FormatConvertedBitmap(source, PixelFormats.Bgra32, null, 0);
             }
+
 
             int width = source.PixelWidth;
             int height = source.PixelHeight;
@@ -28,17 +33,23 @@ namespace KlarfViewer.utils
             contrast = (100.0 + contrast) / 100.0;
             contrast *= contrast;
 
-            for (int i = 0; i < pixels.Length; i += 4)
+            Parallel.For(0, height, y =>
             {
-                for (int c = 0; c < 3; c++) // B, G, R
+                int rowStart = y * stride;
+                int rowEnd = rowStart + stride;
+
+                for (int i = rowStart; i < rowEnd; i += 4)
                 {
-                    double pixel = pixels[i + c];
-                    pixel = ((pixel / 255.0 - 0.5) * contrast + 0.5) * 255.0;
-                    pixel += brightness;
-                    pixel = Math.Max(0, Math.Min(255, pixel));
-                    pixels[i + c] = (byte)pixel;
+                    for (int c = 0; c < 3; c++)
+                    {
+                        double pixel = pixels[i + c];
+                        pixel = ((pixel / 255.0 - 0.5) * contrast + 0.5) * 255.0;
+                        pixel += brightness;
+                        pixel = Math.Max(0, Math.Min(255, pixel));
+                        pixels[i + c] = (byte)pixel;
+                    }
                 }
-            }
+            });
 
             var result = BitmapSource.Create(width, height, source.DpiX, source.DpiY, source.Format, null, pixels, stride);
             result.Freeze();
@@ -49,7 +60,7 @@ namespace KlarfViewer.utils
         // --- Gaussian Blur ---
         // =================================================================
 
-        public static BitmapSource ApplyGaussianBlur(BitmapSource source, int radius)
+        public static BitmapSource ApplyGaussianBlur(BitmapSource source, int radius, double sigma)
         {
             if (source.Format != PixelFormats.Bgra32)
             {
@@ -64,7 +75,7 @@ namespace KlarfViewer.utils
 
             byte[] resultPixels = new byte[pixels.Length];
             
-            double[,] kernel = CreateGaussianKernel(radius);
+            double[,] kernel = CreateGaussianKernel(radius, sigma);
             int kernelSize = radius * 2 + 1;
 
             for (int y = 0; y < height; y++)
@@ -106,11 +117,10 @@ namespace KlarfViewer.utils
             return result;
         }
 
-        private static double[,] CreateGaussianKernel(int radius)
+        private static double[,] CreateGaussianKernel(int radius, double sigma)
         {
             int size = radius * 2 + 1;
             double[,] kernel = new double[size, size];
-            double sigma = radius / 2.0;
             double s2 = 2 * sigma * sigma;
             double sum = 0;
 

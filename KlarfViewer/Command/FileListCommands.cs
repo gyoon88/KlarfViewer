@@ -18,17 +18,41 @@ namespace KlarfViewer.Command
     public class FileListCommands
     {
         private readonly FileListViewModel vm;
+        private readonly MainViewModel mainVM;
 
         public ICommand OpenFolderCommand { get; }
         public ICommand SelectedItemChangedCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand SaveAllModifiedImagesCommand { get; }
 
-        public FileListCommands(FileListViewModel viewModel)
+        public FileListCommands(FileListViewModel viewModel, MainViewModel mainViewModel)
         {
             vm = viewModel;
+            mainVM = mainViewModel;
             OpenFolderCommand = new RelayCommand(ExecuteOpenFolder);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
             SelectedItemChangedCommand = new RelayCommand<object>(ExecuteSelectedItemChanged);
+            SaveAllModifiedImagesCommand = new RelayCommand(ExecuteSaveAllModifiedImages, CanExecuteSaveAllModifiedImages);
+        }
+
+        private bool CanExecuteSaveAllModifiedImages()
+        {
+            return mainVM.ModifiedImages.Count > 0;
+        }
+
+        private void ExecuteSaveAllModifiedImages()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "Save Modified Images",
+                Filter = "TIF Files (*.tif)|*.tif",
+                FileName = "modified_images.tif"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                mainVM.CsvCommand.ExportImages(dialog.FileName, mainVM.ModifiedImages.Values.ToList());
+            }
         }
 
         private void ExecuteSelectedItemChanged(object selectedItem)

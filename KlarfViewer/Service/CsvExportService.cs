@@ -1,7 +1,8 @@
 ﻿using System.IO;
-
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-
+using System.Windows.Media.Imaging;
 
 namespace KlarfViewer.Service
 {
@@ -19,6 +20,26 @@ namespace KlarfViewer.Service
             }
 
             File.WriteAllText(filePath, sb.ToString(), Encoding.UTF8);
+        }
+
+        public static void ExportImages(string filePath, List<BitmapSource> images)
+        {
+            if (images == null || !images.Any())
+            {
+                return;
+            }
+
+            var encoder = new TiffBitmapEncoder();
+
+            foreach (var image in images)
+            {
+                encoder.Frames.Add(BitmapFrame.Create(image));
+            }
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                encoder.Save(stream);
+            }
         }
 
         private static string EscapeCsvField(string field)

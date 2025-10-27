@@ -1,9 +1,10 @@
+using KlarfViewer.utils;
 using System;
+using System.ComponentModel;
 using System.Linq;
-using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
-using KlarfViewer.utils;
+using System.Windows.Media.Imaging;
 
 namespace KlarfViewer.ViewModel
 {
@@ -11,6 +12,20 @@ namespace KlarfViewer.ViewModel
     {
         #region Public Properties for View Binding
 
+        private BitmapSource? image;
+        public BitmapSource? Image
+        {
+            get => image;
+            set
+            {
+                if (SetProperty(ref image, value))
+                {
+                    UpdateAllHistograms(Image);
+                }
+            }
+               
+        }
+        private MainViewModel MainVM { get; set; }
         public int[]? R_HistogramData { get; private set; }
         public int[]? G_HistogramData { get; private set; }
         public int[]? B_HistogramData { get; private set; }
@@ -50,11 +65,34 @@ namespace KlarfViewer.ViewModel
         public int? Range { get => range; private set => SetProperty(ref range, value); }
         #endregion
 
-        public HistogramViewModel(BitmapSource imageSource)
+        public HistogramViewModel(MainViewModel mainVM)
         {
-            UpdateAllHistograms(imageSource);
+            MainVM = mainVM;
+
+            Image = MainVM.DefectImageVM.DefectImage;
+            MainVM.DefectImageVM.PropertyChanged += OnDefectImageChanged;
+            MainVM.ImageProcessingVM.PropertyChanged += OnImageProcessChanged;
+
+            UpdateAllHistograms(Image);
         }
 
+
+        private void OnDefectImageChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DefectImageViewModel.DefectImage))
+            {
+                Image = MainVM.DefectImageVM.DefectImage;
+                UpdateAllHistograms(Image);
+            }
+        }
+        private void OnImageProcessChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ImageProcessingViewModel.ProcessedImage))
+            {
+                Image = MainVM.ImageProcessingVM.ProcessedImage;
+                UpdateAllHistograms(Image);
+            }
+        }
         private void UpdateAllHistograms(BitmapSource imageSource)
         {
             if (imageSource == null) return;
@@ -95,6 +133,8 @@ namespace KlarfViewer.ViewModel
             OnPropertyChanged(nameof(B_HistogramData));
             OnPropertyChanged(nameof(GrayscaleHistogramData));
         }
+
+        
 
         private void SetStatistics(HistogramStatistics stats)
         {

@@ -12,8 +12,8 @@
         Title="KlarfViewer" Height="800" Width="1200" MinHeight="700" MinWidth="1000">
 
     <Window.InputBindings>
-        <KeyBinding Modifiers="Control" Key="S" Command="{Binding CsvCommand.ExportToCsvCommand}"/>
-        <KeyBinding Modifiers="Control" Key="C" />
+        <KeyBinding Modifiers="Control" Key="C" Command="{Binding CsvCommand.ExportToCsvCommand}"/>
+        <KeyBinding Modifiers="Control" Key="S" />
         
         <KeyBinding Key="Up" Command="{Binding DefectListVM.Commands.PrevGlobalCommand}" />
         <KeyBinding Key="Down" Command="{Binding DefectListVM.Commands.NextGlobalCommand}" />
@@ -48,8 +48,8 @@
                           IsCheckable="True" 
                           IsChecked="{Binding DefectImageVM.IsInMeasurementMode, Mode=OneWay}"
                           Command="{Binding DefectImageVM.ToggleMeasurementModeCommand}"/>
-                <MenuItem Header="Image Processing" Command="{Binding ImageProcessingCommand.OpenImageProcessingWindowCommand}" />
-                <MenuItem Header="Histogram Analysis" Command="{Binding ShowHistogramCommand.ShowHistogramCommand}" />
+                <MenuItem Header="Image Processing" Command="{Binding ShowImageProcessingWindowCommand}" />
+                <MenuItem Header="Histogram Analysis" Command="{Binding ShowHistogramCommand}" />
 
                 <!--<MenuItem Header="Export Defect List To CSV" Command="{Binding CsvCommand.ExportToCsvCommand}" />-->
 
@@ -228,7 +228,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Button Grid.Column="0" Content="Open Folder" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.Commands.OpenFolderCommand}" />
-                            <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}"/>
+                            <Button Grid.Column="1" Content="Save All Image" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.Commands.SaveAllModifiedImagesCommand}"/>
                             <Button Grid.Column="2" Content="Refresh" Margin="2" Style="{StaticResource ModernButtonStyle}" Command="{Binding FileListVM.Commands.RefreshCommand}"/>
                             
                             <!-- ProgressBar -->
